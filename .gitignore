@@ -1,0 +1,36 @@
+node_modules/
+.codegraph/
+.native-cache/
+.codex/
+dist/
+out/
+release/
+test-results/
+playwright-report/
+.playwright/
+.shannon/
+.tmp-preview/
+tmp/
+Run tests/
+*.tsbuildinfo
+.env
+.env.local
+.env.*
+!.env.example
+*.pfx
+*.p12
+*.private.pem
+*.private.key
+.secrets/
+certificates/
+*.log
+.tmp/
+pivot-security-audit/
+pivot-security-audit/src/
+pivot-security-audit/tests/
+pivot-security-audit/package.json
+pivot-security-audit/tsconfig.json
+pivot-security-audit/vitest.config.ts
+Pivot UI V2-Figma*.md
+产品定位.md
+核心价值主张.md

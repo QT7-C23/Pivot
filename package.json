@@ -1,0 +1,156 @@
+{
+  "name": "pivot",
+  "version": "2.0.21-beta",
+  "description": "多功能 AI Agent 编码工作台",
+  "private": true,
+  "author": "Heptachron_Abyss",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/QT7-C23/Pivot.git"
+  },
+  "main": "out/main/main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "npm run rebuild:native:electron && electron-vite dev",
+    "build": "tsc --noEmit && electron-vite build",
+    "preview": "npm run rebuild:native:electron && electron-vite preview",
+    "rebuild:native:electron": "node scripts/rebuild-native.mjs electron",
+    "rebuild:native:node": "node scripts/rebuild-native.mjs node",
+    "test": "npm run rebuild:native:node && vitest run",
+    "test:watch": "npm run rebuild:native:node && vitest",
+    "test:e2e": "npm run build && npm run rebuild:native:electron && playwright test",
+    "test:e2e:smoke": "npm run build && npm run rebuild:native:electron && node scripts/e2e-smoke.mjs",
+    "test:e2e:packaged": "node scripts/e2e-packaged-smoke.mjs",
+    "icon:render": "node scripts/render-release-icon.mjs",
+    "dist:win": "npm run icon:render && npm run build && npm run rebuild:native:electron && electron-builder --win nsis --x64",
+    "dist:portable": "npm run icon:render && npm run build && npm run rebuild:native:electron && electron-builder --dir --win --x64",
+    "release:preflight": "node scripts/verify-external-release.mjs",
+    "release:windows": "npm run release:preflight && npm run icon:render && npm run build && npm run rebuild:native:electron && electron-builder --config electron-builder.release.cjs --win nsis --x64 --publish always",
+    "release:qualify-artifacts": "node scripts/verify-external-release.mjs --artifact-dir release",
+    "verify:performance": "node scripts/verify-performance.mjs",
+    "verify:mvp": "node scripts/verify-mvp.mjs",
+    "verify:beta1": "npm run verify:mvp && npm run verify:performance && node scripts/e2e-smoke.mjs --now",
+    "verify:beta2": "npm run verify:mvp && npm run verify:performance && node scripts/e2e-smoke.mjs --now",
+    "marketplace:keygen": "vite-node scripts/marketplace-publisher.ts keygen",
+    "marketplace:sign-catalog": "vite-node scripts/marketplace-publisher.ts sign-catalog",
+    "marketplace:sign-package": "vite-node scripts/marketplace-publisher.ts sign-package"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "^4.0.16",
+    "@ai-sdk/openai": "^4.0.16",
+    "@ai-sdk/openai-compatible": "^3.0.12",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "ai": "^7.0.31",
+    "better-sqlite3": "^13.0.1",
+    "chokidar": "^4.0.3",
+    "diff": "^9.0.0",
+    "electron-updater": "^6.8.9",
+    "ignore": "^7.0.6",
+    "node-pty": "^1.0.0",
+    "smol-toml": "^1.7.0",
+    "undici": "^8.9.0",
+    "yauzl": "3.4.0",
+    "zod": "^4.4.3"
+  },
+  "build": {
+    "appId": "io.pivot.workbench",
+    "productName": "Pivot",
+    "npmRebuild": false,
+    "electronDist": "node_modules/electron/dist",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "out/**/*",
+      "package.json",
+      "!node_modules/better-sqlite3/prebuilds/darwin-*.node",
+      "!node_modules/better-sqlite3/prebuilds/linux*.node",
+      "!node_modules/better-sqlite3/prebuilds/win32-arm64.node",
+      "!node_modules/better-sqlite3/deps/**/*",
+      "!node_modules/better-sqlite3/src/**/*",
+      "!node_modules/node-pty/prebuilds/darwin-*/**/*",
+      "!node_modules/node-pty/prebuilds/win32-arm64/**/*",
+      "!node_modules/node-pty/deps/**/*",
+      "!node_modules/node-pty/src/**/*",
+      "!node_modules/node-pty/third_party/**/*"
+    ],
+    "electronLanguages": [
+      "de",
+      "en-US",
+      "es",
+      "es-419",
+      "fr",
+      "ja",
+      "ko",
+      "pt-BR",
+      "pt-PT",
+      "ru",
+      "zh-CN"
+    ],
+    "extraResources": [
+      {
+        "from": "LICENSE",
+        "to": "LICENSE"
+      },
+      {
+        "from": "THIRD_PARTY_NOTICES.md",
+        "to": "THIRD_PARTY_NOTICES.md"
+      }
+    ],
+    "asarUnpack": [
+      "node_modules/better-sqlite3/**/*",
+      "node_modules/node-pty/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.svg",
+      "signAndEditExecutable": true,
+      "signExecutable": true,
+      "artifactName": "Pivot-${version}-Windows-${arch}.${ext}"
+    },
+    "nsis": {
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "oneClick": false
+    }
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.1",
+    "@tailwindcss/vite": "^4.3.3",
+    "@tanstack/react-virtual": "^3.14.6",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "@types/yauzl": "3.4.0",
+    "@vitejs/plugin-react": "^5.2.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "electron": "^43.4.0",
+    "electron-builder": "^26.15.3",
+    "electron-vite": "^5.0.0",
+    "lucide-react": "^0.468.0",
+    "monaco-editor": "^0.52.2",
+    "node-gyp": "^13.0.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-markdown": "^10.1.0",
+    "rehype-highlight": "^7.0.2",
+    "remark-gfm": "^4.0.1",
+    "tailwind-merge": "^3.6.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.7.2",
+    "vite": "^7.3.6",
+    "vite-node": "3.2.4",
+    "vitest": "^3.2.6",
+    "xterm": "^5.3.0",
+    "zustand": "^5.0.2"
+  }
+}

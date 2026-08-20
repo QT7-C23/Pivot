@@ -1,0 +1,16 @@
+export const TERMINAL_MAX_BUFFER_LENGTH = 80_000
+export const COMMAND_DEFAULT_TIMEOUT_MS = 30_000
+export const COMMAND_MAX_TIMEOUT_MS = 120_000
+export const COMMAND_MAX_OUTPUT_BYTES = 64 * 1024
+export const MAINTENANCE_TIMEOUT_MS = 30_000
+export const MAINTENANCE_MAX_OUTPUT_BYTES = 16 * 1024
+export const FILE_MAX_READ_BYTES = 1024 * 1024
+export const FILE_DEFAULT_SEARCH_LIMIT = 40
+export const FILE_MAX_SEARCH_DIRECTORIES = 2_000
+export const FILE_SEARCH_IGNORED = new Set(['.git', 'node_modules', 'out', 'dist'])
+export const SESSION_MAX_RECENT_PROJECTS = 8
+export const SEARCH_DEBOUNCE_MS = 180
+export const AGENT_CONTEXT_MAX_FILES = 8
+export const AGENT_CONTEXT_MAX_TOTAL_BYTES = 256 * 1024
+export const TERMINAL_DEFAULT_COLS = 100
+export const TERMINAL_DEFAULT_ROWS = 30

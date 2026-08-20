@@ -1,0 +1,164 @@
+/* Pivot UI V2 semantic layer. Values are sourced from Figma Variables, not page-local paint. */
+:root {
+  --pv-text-disabled: #747d78;
+  --pv-border-subtle: #373d40;
+  --pv-border-focus: var(--pv-accent-default);
+  --pv-status-success: #69a77b;
+  --pv-status-info: #6f91ba;
+  --pv-shadow-card: 0 2px 8px rgb(0 0 0 / 12%);
+  --pv-shadow-floating: 0 2px 8px rgb(0 0 0 / 18%);
+  --pv-shadow-popover: 0 1px 4px rgb(0 0 0 / 12%), 0 4px 16px rgb(0 0 0 / 22%);
+  --pv-duration-fast: 120ms;
+  --pv-duration-regular: 180ms;
+  --pv-ease-standard: cubic-bezier(.2, 0, 0, 1);
+}
+
+:root[data-theme="light"] {
+  --pv-text-disabled: #adb3b0;
+  --pv-border-subtle: #e5e7eb;
+  --pv-border-strong: #969b98;
+  --pv-status-success: #4a8a60;
+  --pv-status-info: #5e7897;
+  --pv-status-danger: #9a6060;
+  --pv-shadow-card: 0 2px 8px rgb(0 0 0 / 4%);
+  --pv-shadow-floating: 0 2px 8px rgb(0 0 0 / 8%);
+  --pv-shadow-popover: 0 1px 4px rgb(0 0 0 / 4%), 0 4px 16px rgb(0 0 0 / 10%);
+}
+
+.pv-app-shell { min-width: 0; }
+
+.pv-ui-button {
+  position: relative;
+  display: inline-flex;
+  min-width: 0;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--pv-space-16);
+  border: 1px solid transparent;
+  border-radius: var(--pv-radius-md);
+  background: transparent;
+  color: var(--pv-text-primary);
+  font: 500 13px/20px var(--pv-font-ui);
+  white-space: nowrap;
+  gap: var(--pv-space-8);
+  transition: background-color var(--pv-duration-fast) var(--pv-ease-standard), border-color var(--pv-duration-fast) var(--pv-ease-standard), opacity var(--pv-duration-fast) var(--pv-ease-standard);
+}
+
+.pv-ui-button--sm { height: 32px; padding-inline: 12px; font-size: 12px; }
+.pv-ui-button--icon { width: 36px; padding: 0; }
+.pv-ui-button--primary { background: var(--pv-accent-default); color: var(--pv-bg-elevated); }
+.pv-ui-button--secondary { border-color: var(--pv-border-default); background: var(--pv-bg-elevated); }
+.pv-ui-button--ghost { color: var(--pv-text-secondary); }
+.pv-ui-button--danger { background: var(--pv-status-danger); color: #fff; }
+.pv-ui-button:hover:not(:disabled) { background-image: linear-gradient(rgb(255 255 255 / 8%), rgb(255 255 255 / 8%)); }
+.pv-ui-button--secondary:hover:not(:disabled),
+.pv-ui-button--ghost:hover:not(:disabled) { background: var(--pv-bg-hover); background-image: none; }
+.pv-ui-button:active:not(:disabled) { opacity: .75; }
+.pv-ui-button:focus-visible { outline: 2px solid var(--pv-border-focus); outline-offset: 2px; }
+.pv-ui-button:disabled { pointer-events: none; opacity: .4; }
+.pv-ui-button--loading { color: transparent; }
+.pv-ui-button--loading::before {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  color: var(--pv-bg-elevated);
+  content: "";
+  animation: pv-button-spin 700ms linear infinite;
+}
+.pv-ui-button--secondary.pv-ui-button--loading::before,
+.pv-ui-button--ghost.pv-ui-button--loading::before { color: var(--pv-text-primary); }
+
+@keyframes pv-button-spin { to { transform: rotate(360deg); } }
+
+.pv-global-rail,
+.pv-titlebar,
+.pv-settings-navigation,
+.pv-marketplace-sidebar { background: var(--pv-bg-surface); }
+
+.pv-command-palette-trigger,
+.pv-marketplace-card,
+.pv-now-summary,
+.pv-continue-card { box-shadow: var(--pv-shadow-card); }
+
+.pv-settings-navigation nav button {
+  grid-template-columns: 2px 16px minmax(0, 1fr);
+  column-gap: 8px;
+}
+
+.pv-settings-navigation nav button > i { grid-column: 1; }
+.pv-settings-navigation nav button > svg { grid-column: 2; color: var(--pv-text-secondary); }
+.pv-settings-navigation nav button > span { grid-column: 3; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pv-settings-navigation nav button.active > svg { color: var(--pv-accent-default); }
+
+.pv-now-summary,
+.pv-continue-card,
+.pv-marketplace-card,
+.pv-setting-row,
+.pv-now-list article,
+.pv-attention-item { min-width: 0; }
+
+.pv-now-summary span,
+.pv-continue-card strong,
+.pv-marketplace-card p,
+.pv-marketplace-card strong,
+.pv-setting-row,
+.pv-now-list strong,
+.pv-attention-item { overflow-wrap: anywhere; }
+
+.pv-marketplace-card { box-shadow: var(--pv-shadow-card); }
+.pv-marketplace-card:focus-within { border-color: var(--pv-border-focus); }
+.pv-marketplace-sidebar-section { display: grid; gap: 4px; }
+.pv-marketplace-sidebar-section > h2 {
+  margin: 0;
+  color: var(--pv-text-secondary);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.pv-marketplace-sidebar-section > nav { display: grid; gap: 2px; }
+.pv-marketplace-tools { display: flex; min-width: min(440px, 48%); align-items: center; justify-content: flex-end; gap: 8px; }
+.pv-marketplace-tools > label:first-child { width: min(280px, 100%); min-width: 160px; }
+.pv-marketplace-source {
+  height: 36px;
+  max-width: 160px;
+  padding: 0 28px 0 10px;
+  border: 1px solid var(--pv-border-default);
+  border-radius: var(--pv-radius-md);
+  outline: 0;
+  background: var(--pv-bg-elevated);
+  color: var(--pv-text-primary);
+  font: 500 11px var(--pv-font-ui);
+}
+.pv-marketplace-source:focus-visible { border-color: var(--pv-border-focus); outline: 2px solid color-mix(in srgb, var(--pv-border-focus) 25%, transparent); }
+
+@media (max-width: 940px) {
+  .pv-marketplace-sidebar-section { display: contents; }
+  .pv-marketplace-sidebar-section > h2 { display: none; }
+  .pv-marketplace-tools { width: 100%; min-width: 0; justify-content: stretch; }
+  .pv-marketplace-tools > label:first-child { width: 100%; }
+}
+
+@media (max-width: 760px) {
+  .pv-titlebar { padding-right: 132px; padding-left: 8px; }
+  .pv-titlebar-brand strong { display: none; }
+  .pv-command-palette-trigger { width: min(360px, calc(100vw - 210px)); min-width: 96px; }
+  .pv-command-palette-trigger span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pv-settings-layout { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(120px, 30vh) minmax(0, 1fr); }
+  .pv-settings-navigation { border-right: 0; border-bottom: 1px solid var(--pv-border-default); }
+  .pv-settings-content { padding: 20px 16px; }
+  .pv-now-summary-grid { grid-template-columns: minmax(0, 1fr); }
+  .pv-now-workspace { padding: 16px; }
+  .pv-now-hero { align-items: flex-start; flex-direction: column; }
+  .pv-marketplace-tools { align-items: stretch; flex-direction: column; }
+  .pv-marketplace-source { width: 100%; max-width: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pv-ui-button { transition: none; }
+  .pv-ui-button--loading::before { animation-duration: 1400ms; }
+}

@@ -1,0 +1,1 @@
+export const ELECTRON_RUNTIME_VERSION = '43.4.0'

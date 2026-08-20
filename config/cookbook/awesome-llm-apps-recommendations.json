@@ -1,0 +1,78 @@
+{
+  "version": "0.1.0",
+  "note": "Seed data for Pivot Cookbook system. Maps awesome-llm-apps RAG patterns to local model recommendations.",
+  "entries": [
+    {
+      "app": "agentic_rag_with_reasoning",
+      "rag_type": "agentic_rag",
+      "recommended_model": "qwen-2.5-14b-instruct",
+      "min_ram_gb": 24,
+      "embedding_model": "intfloat/e5-mistral-7b-instruct",
+      "vector_store": "qdrant",
+      "notes": "需要推理能力 — 推荐使用量化版本 (Q4_K_M)"
+    },
+    {
+      "app": "deepseek_local_rag_agent",
+      "rag_type": "basic_rag",
+      "recommended_model": "deepseek-coder-6.7b-instruct",
+      "min_ram_gb": 8,
+      "embedding_model": "BAAI/bge-small-en-v1.5",
+      "vector_store": "chromadb",
+      "notes": "最便宜的本地 RAG 入口，8GB RAM 可 CPU 运行"
+    },
+    {
+      "app": "llama3.1_local_rag",
+      "rag_type": "basic_rag",
+      "recommended_model": "llama-3.1-8b-instruct",
+      "min_ram_gb": 16,
+      "embedding_model": "nomic-embed-text-v1.5",
+      "vector_store": "chromadb",
+      "notes": "配合 llama.cpp 量化效果不错"
+    },
+    {
+      "app": "corrective_rag",
+      "rag_type": "agentic_rag",
+      "recommended_model": "qwen-2.5-14b-instruct",
+      "min_ram_gb": 24,
+      "embedding_model": "intfloat/e5-mistral-7b-instruct",
+      "vector_store": "qdrant",
+      "notes": "需要多次推理循环 — 建议至少 24GB"
+    },
+    {
+      "app": "knowledge_graph_rag",
+      "rag_type": "advanced_rag",
+      "recommended_model": "qwen-2.5-14b-instruct",
+      "min_ram_gb": 32,
+      "embedding_model": "intfloat/e5-mistral-7b-instruct",
+      "vector_store": "neo4j",
+      "notes": "需要图数据库 — 实体提取是瓶颈"
+    },
+    {
+      "app": "vision_rag",
+      "rag_type": "multimodal_rag",
+      "recommended_model": "llama-3.2-11b-vision",
+      "min_ram_gb": 24,
+      "embedding_model": "clip-vit-base-patch32",
+      "vector_store": "chromadb",
+      "notes": "多模态 RAG — 需要视觉模型支持"
+    },
+    {
+      "app": "hybrid_search_rag",
+      "rag_type": "basic_rag",
+      "recommended_model": "llama-3.1-8b-instruct",
+      "min_ram_gb": 16,
+      "embedding_model": "BAAI/bge-m3",
+      "vector_store": "elasticsearch",
+      "notes": "混合搜索（向量+关键词）— Elasticsearch 需要额外资源"
+    },
+    {
+      "app": "self_rag",
+      "rag_type": "agentic_rag",
+      "recommended_model": "qwen-2.5-14b-instruct",
+      "min_ram_gb": 24,
+      "embedding_model": "intfloat/e5-mistral-7b-instruct",
+      "vector_store": "qdrant",
+      "notes": "Self-RAG — 需要模型支持 reflection tokens"
+    }
+  ]
+}

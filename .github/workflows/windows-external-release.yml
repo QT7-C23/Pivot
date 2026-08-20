@@ -1,0 +1,85 @@
+name: Windows external release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: Exact package version to qualify and publish
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: windows-latest
+    environment: external-release
+    timeout-minutes: 45
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Match protected branch and requested version
+        shell: pwsh
+        env:
+          REQUESTED_RELEASE_VERSION: ${{ inputs.release_version }}
+        run: |
+          if ($env:GITHUB_REPOSITORY -ne 'QT7-C23/Pivot') { throw "External releases must run in QT7-C23/Pivot" }
+          if ($env:GITHUB_REF -ne 'refs/heads/main') { throw "External releases must run from main" }
+          $actual = node -p "require('./package.json').version"
+          if ($actual -ne $env:REQUESTED_RELEASE_VERSION) { throw "Requested version does not match package.json" }
+      - run: npm ci
+      - name: Repository and authority preflight
+        run: npm run release:preflight
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PIVOT_SIGNING_METHOD: ${{ vars.PIVOT_SIGNING_METHOD }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          PIVOT_AZURE_ACCOUNT_NAME: ${{ vars.PIVOT_AZURE_ACCOUNT_NAME }}
+          PIVOT_AZURE_CERTIFICATE_PROFILE: ${{ vars.PIVOT_AZURE_CERTIFICATE_PROFILE }}
+          PIVOT_AZURE_ENDPOINT: ${{ vars.PIVOT_AZURE_ENDPOINT }}
+          PIVOT_AZURE_PUBLISHER_NAME: ${{ vars.PIVOT_AZURE_PUBLISHER_NAME }}
+          WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
+          WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
+      - name: Full Beta-2 qualification
+        run: npm run verify:beta2
+      - name: Build signed draft release
+        run: npm run release:windows
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PIVOT_SIGNING_METHOD: ${{ vars.PIVOT_SIGNING_METHOD }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          PIVOT_AZURE_ACCOUNT_NAME: ${{ vars.PIVOT_AZURE_ACCOUNT_NAME }}
+          PIVOT_AZURE_CERTIFICATE_PROFILE: ${{ vars.PIVOT_AZURE_CERTIFICATE_PROFILE }}
+          PIVOT_AZURE_ENDPOINT: ${{ vars.PIVOT_AZURE_ENDPOINT }}
+          PIVOT_AZURE_PUBLISHER_NAME: ${{ vars.PIVOT_AZURE_PUBLISHER_NAME }}
+          WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
+          WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
+      - name: Packaged production smoke test
+        run: npm run test:e2e:packaged
+      - name: Verify signed release artifacts
+        run: npm run release:qualify-artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PIVOT_SIGNING_METHOD: ${{ vars.PIVOT_SIGNING_METHOD }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          PIVOT_AZURE_ACCOUNT_NAME: ${{ vars.PIVOT_AZURE_ACCOUNT_NAME }}
+          PIVOT_AZURE_CERTIFICATE_PROFILE: ${{ vars.PIVOT_AZURE_CERTIFICATE_PROFILE }}
+          PIVOT_AZURE_ENDPOINT: ${{ vars.PIVOT_AZURE_ENDPOINT }}
+          PIVOT_AZURE_PUBLISHER_NAME: ${{ vars.PIVOT_AZURE_PUBLISHER_NAME }}
+          WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
+          WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}

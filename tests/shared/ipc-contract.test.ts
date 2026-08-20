@@ -1,0 +1,137 @@
+import { describe, expect, it } from 'vitest'
+import type { IPCContract } from '../../src/shared/types/ipc'
+
+const channels = [
+  'attention:list',
+  'attention:observe',
+  'attention:resolve',
+  'attention:reopen',
+  'chat:send',
+  'chat:abort',
+  'chat:list',
+  'chat:permission',
+  'agent:info',
+  'agent:profiles',
+  'agent:select-profile',
+  'agent:configure-custom-profile',
+  'agent:run-cli-maintenance',
+  'axis:shadow-state',
+  'axis:set-shadow-enabled',
+  'axis:plan-shadow',
+  'axis:list-traces',
+  'axis:list-shadow-runs',
+  'axis:list-run-states',
+  'axis:cancel-run',
+  'axis:restart-run',
+  'axis:dry-run-state',
+  'axis:set-dry-run-enabled',
+  'axis:execute-dry-run',
+  'axis:guarded-safe-write-state',
+  'axis:propose-guarded-safe-write',
+  'axis:execute-guarded-safe-write',
+  'axis:list-semantic-review-telemetry',
+  'axis:qualify-reviewer',
+  'axis:get-reviewer-routing',
+  'axis:update-reviewer-routing',
+  'provider:probe-models',
+  'fs:tree',
+  'fs:children',
+  'fs:read',
+  'fs:search',
+  'fs:watch',
+  'fs:create-file',
+  'fs:create-directory',
+  'fs:reveal',
+  'fs:checkpoint',
+  'fs:list-checkpoints',
+  'fs:restore-checkpoint',
+  'fs:list-reviews',
+  'fs:get-review',
+  'fs:resolve-review',
+  'timeline:list',
+  'timeline:restore-change',
+  'project:choose-directory',
+  'project:create',
+  'project:recent',
+  'project:last',
+  'preview:open-external',
+  'update:state',
+  'update:check',
+  'update:download',
+  'update:install',
+  'settings:application-preferences',
+  'settings:update-application-preferences',
+  'settings:list-feedback',
+  'settings:choose-feedback-attachments',
+  'settings:discard-feedback-attachment',
+  'settings:submit-feedback',
+  'plan:list',
+  'plan:list-all',
+  'plan:generate',
+  'plan:update',
+  'plan:approve',
+  'plan:execute',
+  'plan:execute-next',
+  'plan:cancel',
+  'provider:list',
+  'provider:save',
+  'provider:set-active',
+  'provider:test',
+  'provider:delete',
+  'term:create',
+  'term:write',
+  'term:resize',
+  'term:destroy',
+  'session:list',
+  'session:get',
+  'session:create',
+  'session:open-project',
+  'session:delete',
+  'session:soft-delete',
+  'session:undo-delete',
+  'session:set-pinned',
+  'session:update',
+  'session:search',
+  'session:fork',
+  'session:list-groups',
+  'session:create-group',
+  'session:rename-group',
+  'session:delete-group',
+  'session:export',
+  'marketplace:catalog',
+  'marketplace:favorites',
+  'marketplace:set-favorite',
+  'marketplace:installations',
+  'marketplace:install',
+  'marketplace:uninstall',
+  'marketplace:activate',
+  'marketplace:deactivate',
+  'marketplace:active-resources',
+  'marketplace:invoke-plugin',
+  'marketplace:update',
+  'marketplace:updates',
+  'marketplace:rollback-update',
+  'marketplace:finalize-update',
+  'marketplace:qualification',
+] as const satisfies ReadonlyArray<keyof IPCContract>
+
+type ListedChannel = (typeof channels)[number]
+type MissingChannel = Exclude<keyof IPCContract, ListedChannel>
+type ExtraChannel = Exclude<ListedChannel, keyof IPCContract>
+
+const channelCoverage: Record<MissingChannel | ExtraChannel, never> = {}
+
+describe('IPCContract', () => {
+  it('lists every IPC channel exactly once in contract tests', () => {
+    expect(channelCoverage).toEqual({})
+    expect(new Set(channels).size).toBe(channels.length)
+  })
+
+  it('keeps channels explicitly named by domain:action', () => {
+    expect(channels.every((channel) => /^[a-z]+:[a-z-]+$/.test(channel))).toBe(true)
+  })
+
+  it('keeps transport flags out of domain contract names', () => {
+    expect(channels.some((channel) => channel.includes('already_streamed'))).toBe(false)
+  })
+})
