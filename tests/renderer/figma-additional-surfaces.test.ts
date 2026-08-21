@@ -105,7 +105,7 @@ describe('current Figma additional surfaces', () => {
   it('renders searchable Help entries that target real application routes', () => {
     const html = renderToStaticMarkup(createElement(HelpWorkspace, { onNavigate: () => undefined }))
 
-    expect(html).toContain('data-figma-screen="248:5476"')
+    expect(html).toContain('data-figma-screen="818:12562"')
     expect(html).toContain('Models &amp; Providers')
     expect(html).toContain('Keyboard Shortcuts')
     expect(html).toContain('data-target-route="settings"')

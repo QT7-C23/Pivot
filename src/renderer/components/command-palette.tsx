@@ -94,7 +94,7 @@ export function CommandPalette({
   return (
     <div
       className="pv-command-palette-backdrop"
-      data-figma-screen="597:5670"
+      data-figma-screen="818:21302"
       onMouseDown={(event) => { if (event.currentTarget === event.target) onClose() }}
     >
       <section aria-label={copy.placeholder} aria-modal="true" className="pv-command-palette" role="dialog">

@@ -3,25 +3,26 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type
 import type { FileSearchEntry, SessionRecord } from '../shared/types/domain'
 import { AgentStatusPanel, PermissionDialogQueue } from './components/agent-status-panel'
 import { AttentionCenter, projectAttentionItems } from './components/attention-center'
-import { ArtifactReviewContextSidebar, ArtifactReviewInspector } from './components/artifact-review-chrome'
 import { AxisShadowPanel } from './components/axis-shadow-panel'
 import { ChatWorkspace } from './components/chat-workspace'
 import { CommandPalette } from './components/command-palette'
 import { ContextTimelineWorkspace } from './components/context-timeline-workspace'
 import { DocsFilesWorkspace } from './components/docs-files-workspace'
+import { DatabaseWorkspace } from './components/database-workspace'
 import { HelpWorkspace } from './components/help-workspace'
-import { NowWorkspace } from './components/now-workspace'
+import { DashboardWorkspace } from './components/dashboard-workspace'
 import { PlanWorkspace } from './components/plan-workspace'
 import { PivotAppShell } from './components/pivot-app-shell'
 import { PreviewWorkspace } from './components/preview-workspace'
+import { ProfileWorkspace } from './components/profile-workspace'
 import { ProjectOverviewWorkspace } from './components/project-overview-workspace'
+import { ProjectStudioChrome, type ProjectStudioTab } from './components/project-studio-chrome'
 import { RuntimeHubWorkspace } from './components/runtime-hub-workspace'
 import { RuntimeExecutableDialog } from './components/runtime-executable-dialog'
 import { WorkCenterWorkspace } from './components/work-center-workspace'
-import { WorkPlanContextSidebar, WorkPlanInspector } from './components/work-plan-chrome'
+import { WorkPlanContextSidebar } from './components/work-plan-chrome'
 import { WorkspaceContextSidebar } from './components/workspace-context-sidebar'
 import { TerminalWorkspace } from './components/terminal-workspace'
-import { WelcomeScreen } from './components/welcome-screen'
 import { useQuickCaptureSignal } from './hooks/useQuickCaptureSignal'
 import { useSendMessage } from './hooks/useSendMessage'
 import { usePivotAppBootstrap } from './hooks/usePivotAppBootstrap'
@@ -38,7 +39,7 @@ import { usePermissionStore } from './stores/permission.store'
 import { usePlanStore } from './stores/plan.store'
 import { useSessionStore } from './stores/session.store'
 import { useTerminalStore } from './stores/terminal.store'
-import { useUIStore, type WorkspaceActivity } from './stores/ui.store'
+import { useUIStore } from './stores/ui.store'
 import { projectLegacyWorkItems } from './adapters/work-model-adapter'
 import { projectService } from './services/project.service'
 import { EditorLoadingState, SettingsLoadingState } from './components/workspace-loading-states'
@@ -54,10 +55,7 @@ const SettingsWorkspace = lazy(() =>
   import('./components/settings-workspace').then((module) => ({ default: module.SettingsWorkspace })),
 )
 const AutomationWorkspace = lazy(() =>
-  import('./components/automation-workspace').then((module) => ({ default: module.AutomationWorkspace })),
-)
-const ExtensionsEmptyWorkspace = lazy(() =>
-  import('./components/extensions-empty-workspace').then((module) => ({ default: module.ExtensionsEmptyWorkspace })),
+  import('./components/automation-workspace-v2').then((module) => ({ default: module.AutomationWorkspace })),
 )
 const PluginEcosystemPage = lazy(() =>
   import('./components/plugin-ecosystem-page').then((module) => ({ default: module.PluginEcosystemPage })),
@@ -65,19 +63,14 @@ const PluginEcosystemPage = lazy(() =>
 const NewProjectDialog = lazy(() =>
   import('./components/new-project-dialog').then((module) => ({ default: module.NewProjectDialog })),
 )
+const WelcomeScreen = lazy(() =>
+  import('./components/welcome-screen').then((module) => ({ default: module.WelcomeScreen })),
+)
 
 export function App(): ReactElement {
   const { locale, setLocale, t } = useLocale()
   const setTheme = useUIStore((state) => state.setTheme)
   usePivotAppBootstrap(locale, setLocale, setTheme)
-  const workTabs = locale === 'zh-CN'
-    ? { artifacts: '成果', conversation: '对话', plan: '计划', runs: '运行' }
-    : locale === 'ja'
-      ? { artifacts: '成果物', conversation: '会話', plan: '計画', runs: '実行' }
-      : locale === 'de'
-        ? { artifacts: 'Ergebnisse', conversation: 'Unterhaltung', plan: 'Plan', runs: 'Ausführungen' }
-        : { artifacts: 'Artifacts', conversation: 'Conversation', plan: 'Plan', runs: 'Runs' }
-
   const [projectPath, setProjectPath] = useState('')
   const [quickOpenQuery, setQuickOpenQuery] = useState('')
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
@@ -403,13 +396,6 @@ export function App(): ReactElement {
     }
   }
 
-  function selectActivity(activity: WorkspaceActivity): void {
-    setWorkspaceActivity(activity)
-    if (activity === 'sessions') setSessionView('conversation')
-    if (activity === 'files') setSessionView('editor')
-    if (activity === 'timeline' && activeSessionId) void loadTimeline(activeSessionId)
-  }
-
   useEffect(() => {
     void Promise.all([loadSessions(), loadProjectHistory(), loadAdapterInfo(), loadCliProfiles(), loadAllPlans()])
   }, [loadAdapterInfo, loadAllPlans, loadCliProfiles, loadProjectHistory, loadSessions])
@@ -440,7 +426,7 @@ export function App(): ReactElement {
     return () => window.clearTimeout(timeoutId)
   }, [activeSessionId, clearSearch, projectPath, quickOpenQuery, searchFiles])
 
-  function finishWelcome(route: 'sessions' | 'projects'): void {
+  function finishWelcome(route: PivotRoute): void {
     localStorage.setItem('pivot:onboarding-complete', '1')
     setShowWelcome(false)
     setActiveRoute(route)
@@ -465,74 +451,91 @@ export function App(): ReactElement {
 
   if (showWelcome) {
     return (
-      <WelcomeScreen
-        onChooseProject={async () => {
-          await chooseProject()
-          finishWelcome('projects')
-        }}
-        onOpenSettings={() => {
-          localStorage.setItem('pivot:onboarding-complete', '1')
-          setShowWelcome(false)
-          setActiveRoute('settings')
-        }}
-        onStart={() => finishWelcome('sessions')}
-      />
+      <Suspense fallback={<main aria-busy="true" className="welcome-screen pv-onboarding" />}>
+        <WelcomeScreen
+          onBrowseMarketplace={() => finishWelcome('marketplace')}
+          onChooseProject={async () => {
+            await chooseProject()
+            finishWelcome('projects')
+          }}
+          onOpenSettings={() => {
+            localStorage.setItem('pivot:onboarding-complete', '1')
+            setShowWelcome(false)
+            setActiveRoute('settings')
+          }}
+          onStart={() => finishWelcome('now')}
+        />
+      </Suspense>
     )
   }
-
-  const nowContextSidebar = (
-    <WorkspaceContextSidebar
-      activeSessionId={activeSessionId}
-      onOpenSession={openSession}
-      sessions={sessions}
-      variant="now"
-    />
-  )
 
   const projectContextSidebar = (
     <WorkspaceContextSidebar
       activeSessionId={activeSessionId}
       onOpenSession={openSession}
+      onCreateProject={() => setNewProjectOpen(true)}
+      onOpenSettings={() => navigate('settings')}
       projectPath={projectPath || activeSession?.projectPath || lastProject?.path || ''}
       sessions={sessions}
       variant="project"
     />
   )
 
-  const agentPanel = activeRoute === 'sessions' ? (
-    <AgentStatusPanel
-      abortStream={abortMessage}
-      agentLabel={adapterInfo?.label ?? 'Pivot Agent'}
-      agentState={agentState}
-      currentTask={currentTask}
-      isStreaming={isStreaming}
-      operations={operations}
-      permissionRequests={permissionRequests}
-      streamPhase={streamPhase}
-      tokenUsage={tokenUsage}
-    />
-  ) : activeRoute === 'work' ? (
-    <WorkPlanInspector adapterInfo={adapterInfo} plan={activePlan} />
-  ) : activeRoute === 'artifacts' ? (
-    <ArtifactReviewInspector review={activeReview} resolveReview={resolveReview} />
-  ) : undefined
-
-  const contextSidebar = activeRoute === 'now'
-    ? nowContextSidebar
-    : activeRoute === 'sessions'
-      ? nowContextSidebar
+  const contextSidebar = activeRoute === 'sessions'
+      ? sessions.length > 0 ? projectContextSidebar : undefined
     : activeRoute === 'projects'
       ? sessions.length > 0 ? projectContextSidebar : undefined
-      : activeRoute === 'artifacts'
-        ? <ArtifactReviewContextSidebar activeReview={activeReview} reviews={fileReviews} />
-      : activeRoute === 'work'
-        ? <WorkPlanContextSidebar plan={activePlan} session={activeSession} />
+      : activeRoute === 'artifacts' || activeRoute === 'work'
+        ? sessions.length > 0 ? projectContextSidebar : undefined
         : undefined
+
+  const activeProjectTab: ProjectStudioTab = activeRoute === 'work'
+    ? workView === 'timeline' ? 'runs' : 'tasks'
+    : activeRoute === 'artifacts'
+      ? 'diff'
+      : activeSessionView === 'preview'
+        ? 'preview'
+        : activeSessionView === 'terminal'
+          ? 'terminal'
+          : 'chat'
+  const projectFigmaScreen = activeProjectTab === 'chat' ? '818:12754'
+    : activeProjectTab === 'tasks' ? activePlan?.status === 'executing' || activePlan?.status === 'paused' ? '818:13243' : '818:15791'
+      : activeProjectTab === 'diff' ? '818:16236'
+        : activeProjectTab === 'runs' ? '818:13638'
+          : activeProjectTab === 'preview' ? '818:14000'
+            : '818:14210'
+  const activeProjectName = activeSession?.projectPath.split(/[\\/]/).filter(Boolean).at(-1) ?? (projectPath.split(/[\\/]/).filter(Boolean).at(-1) || 'Pivot')
+
+  function selectProjectTab(tab: ProjectStudioTab): void {
+    if (tab === 'chat' || tab === 'preview' || tab === 'terminal') {
+      setActiveRoute('sessions')
+      setSessionView(tab === 'chat' ? 'conversation' : tab)
+      return
+    }
+    if (tab === 'tasks' || tab === 'runs') {
+      setActiveRoute('work')
+      setWorkView(tab === 'tasks' ? 'plan' : 'timeline')
+      setWorkspaceActivity(tab === 'tasks' ? 'plan' : 'timeline')
+      if (tab === 'runs' && activeSessionId) void loadTimeline(activeSessionId)
+      return
+    }
+    setActiveRoute('artifacts')
+    setSessionView('editor')
+    setWorkspaceActivity('files')
+  }
+
+  const projectChromeProps = {
+    activeTab: activeProjectTab,
+    figmaScreen: projectFigmaScreen,
+    onSelectTab: selectProjectTab,
+    onShare: () => { if (activeSessionId) void exportSessionToClipboard(activeSessionId, 'markdown') },
+    projectName: activeProjectName,
+    workspaceName: locale === 'zh-CN' ? '我的项目' : 'My Project',
+  }
 
   return (
     <PivotAppShell
       activeRoute={activeRoute}
-      activityPanel={agentPanel}
       commandPaletteOpen={commandPaletteOpen}
       contextSidebar={contextSidebar}
       onNavigate={navigate}
@@ -572,19 +575,18 @@ export function App(): ReactElement {
       )}
 
       {activeRoute === 'now' && (
-        <NowWorkspace
+        <DashboardWorkspace
           attentionMessage={error}
           isStreaming={isStreaming}
           onCreateProject={() => setNewProjectOpen(true)}
-          onNavigateToAutomations={() => navigate('automations')}
-          onNavigateToExtensions={() => navigate('extensions')}
-          onNavigateToProjects={() => navigate('projects')}
           onOpenSession={openSession}
-          operationCount={operations.length}
+          operations={operations}
           sessions={sessions}
           workItems={workItems}
         />
       )}
+
+      {activeRoute === 'profile' && <ProfileWorkspace operations={operations} sessions={sessions} workItems={workItems} />}
 
       {activeRoute === 'runtimes' && (
         <RuntimeHubWorkspace
@@ -601,7 +603,7 @@ export function App(): ReactElement {
       )}
 
       {activeRoute === 'marketplace' && <Suspense fallback={<SettingsLoadingState />}><PluginEcosystemPage onConfigure={() => navigate('settings')} surface="marketplace" /></Suspense>}
-      {activeRoute === 'extensions' && <Suspense fallback={null}><ExtensionsEmptyWorkspace onBrowseMarketplace={() => navigate('marketplace')} /></Suspense>}
+      {activeRoute === 'extensions' && <Suspense fallback={<SettingsLoadingState />}><PluginEcosystemPage onBrowseMarketplace={() => navigate('marketplace')} onConfigure={() => navigate('settings')} surface="extensions" /></Suspense>}
 
       {activeRoute === 'docs' && (
         <DocsFilesWorkspace
@@ -611,6 +613,8 @@ export function App(): ReactElement {
           projectPath={projectPath || activeSession?.projectPath || lastProject?.path || ''}
         />
       )}
+
+      {activeRoute === 'database' && <DatabaseWorkspace />}
 
       {activeRoute === 'help' && <HelpWorkspace onNavigate={navigate} />}
 
@@ -652,26 +656,19 @@ export function App(): ReactElement {
       )}
 
       {activeRoute === 'artifacts' && (
-        <Suspense fallback={<EditorLoadingState />}>
-          {activeReview ? (
-            <FileReviewWorkspace review={activeReview} resolveReview={resolveReview} />
-          ) : (
-            <section className="pv-artifact-empty"><FileCode2 aria-hidden="true" size={24} /><strong>No artifact selected</strong><span>Open an artifact from a project or completed task to review its changes.</span></section>
-          )}
-        </Suspense>
+        <ProjectStudioChrome {...projectChromeProps}>
+          <Suspense fallback={<EditorLoadingState />}>
+            {activeReview ? (
+              <FileReviewWorkspace review={activeReview} resolveReview={resolveReview} />
+            ) : (
+              <section className="pv-artifact-empty"><FileCode2 aria-hidden="true" size={24} /><strong>No artifact selected</strong><span>Open an artifact from a project or completed task to review its changes.</span></section>
+            )}
+          </Suspense>
+        </ProjectStudioChrome>
       )}
 
       {activeRoute === 'work' && (
-        <section className="pv-work-stage">
-          <header className="pv-studio-header">
-            <div><span>{t('mode.agent')}</span><strong>{activeSession?.title ?? t('chat.openWorkspace')}</strong></div>
-            <div className="pv-stage-tabs">
-              <button className={workView === 'plan' ? 'active' : ''} onClick={() => { setWorkView('plan'); selectActivity('plan') }} type="button">{workTabs.plan}</button>
-              <button onClick={() => navigate('sessions')} type="button">{workTabs.conversation}</button>
-              <button onClick={() => navigate('artifacts')} type="button">{workTabs.artifacts}</button>
-              <button aria-label="Context timeline" className={workView === 'timeline' ? 'active' : ''} onClick={() => { setWorkView('timeline'); selectActivity('timeline') }} type="button">{workTabs.runs}</button>
-            </div>
-          </header>
+        <ProjectStudioChrome {...projectChromeProps}>
           {workView === 'overview' ? (
             <WorkCenterWorkspace
               activeSessionId={activeSessionId}
@@ -693,47 +690,61 @@ export function App(): ReactElement {
               sessionId={activeSessionId}
             />
           ) : (
-            <div className="pv-plan-stack">
-              <AxisShadowPanel sessionId={activeSessionId} />
-              <PlanWorkspace
-                approve={approvePlan}
-                cancel={cancelPlan}
-                execute={executePlan}
-                executeNext={executeNextPlanStep}
-                generate={generatePlan}
-                isBusy={isPlanBusy}
-                plan={activePlan}
-                sessionId={activeSessionId}
-              />
+            <div className={activePlan?.status === 'executing' || activePlan?.status === 'paused' ? 'pv-project-task-execution' : 'pv-project-task-plan'}>
+              {(activePlan?.status === 'executing' || activePlan?.status === 'paused') && <WorkPlanContextSidebar plan={activePlan} session={activeSession} />}
+              <div className="pv-plan-stack">
+                <AxisShadowPanel sessionId={activeSessionId} />
+                <PlanWorkspace
+                  approve={approvePlan}
+                  cancel={cancelPlan}
+                  execute={executePlan}
+                  executeNext={executeNextPlanStep}
+                  generate={generatePlan}
+                  isBusy={isPlanBusy}
+                  plan={activePlan}
+                  sessionId={activeSessionId}
+                />
+              </div>
             </div>
           )}
-        </section>
+        </ProjectStudioChrome>
       )}
 
       {activeRoute === 'sessions' && (
-        <section className="pv-session-stage">
-          <header className="pv-studio-header pv-conversation-header" data-figma-screen="63:190">
-            <div><span>{activeSession?.projectPath ? activeSession.projectPath.split(/[\\/]/).at(-1) ?? activeSession.projectPath : t('session.workspace')}</span><b>/</b><strong>{activeSession?.title ?? t('session.new')}</strong></div>
-            <button disabled={!activeSessionId} onClick={() => activeSessionId && void exportSessionToClipboard(activeSessionId, 'markdown')} type="button">Share</button>
-          </header>
-          <div className="pv-workspace-surface">
-            {activeSessionView === 'conversation' ? (
-              <ChatWorkspace
-                activeFilePath={activeFilePath}
-                activeSessionId={activeSessionId}
-                focusRequest={quickCaptureFocusRequest}
-                interactionMode={chatSubmode === 'preview' ? 'agent' : chatSubmode}
+        <ProjectStudioChrome {...projectChromeProps}>
+          {activeSessionView === 'conversation' ? (
+            <div className="pv-project-chat-layout">
+              <div className="pv-workspace-surface"><section className="pv-project-chat-view">
+                <header><strong>{activeSession?.title ?? t('session.new')}</strong><button disabled={!activeSessionId} onClick={() => activeSessionId && void exportSessionToClipboard(activeSessionId, 'markdown')} type="button">{locale === 'zh-CN' ? '分享会话' : 'Share Session'}</button></header>
+                <ChatWorkspace
+                  activeFilePath={activeFilePath}
+                  activeSessionId={activeSessionId}
+                  focusRequest={quickCaptureFocusRequest}
+                  interactionMode={chatSubmode === 'preview' ? 'agent' : chatSubmode}
+                  isStreaming={isStreaming}
+                  messages={messages}
+                  onAbort={abortMessage}
+                  onChooseProject={chooseProject}
+                  onOpenWorkspaceDetails={() => navigate('projects')}
+                  onSetReasoningEffort={setReasoningEffort}
+                  reasoningEffort={reasoningEffort}
+                  sendMessage={sendMessage}
+                  streamPhase={streamPhase}
+                />
+              </section></div>
+              <AgentStatusPanel
+                abortStream={abortMessage}
+                agentLabel={adapterInfo?.label ?? 'Pivot Agent'}
+                agentState={agentState}
+                currentTask={currentTask}
                 isStreaming={isStreaming}
-                messages={messages}
-                onAbort={abortMessage}
-                onChooseProject={chooseProject}
-                onOpenWorkspaceDetails={() => navigate('projects')}
-                onSetReasoningEffort={setReasoningEffort}
-                reasoningEffort={reasoningEffort}
-                sendMessage={sendMessage}
+                operations={operations}
+                permissionRequests={permissionRequests}
                 streamPhase={streamPhase}
+                tokenUsage={tokenUsage}
               />
-            ) : activeSessionView === 'preview' ? (
+            </div>
+          ) : <div className="pv-workspace-surface">{activeSessionView === 'preview' ? (
               <PreviewWorkspace />
             ) : activeSessionView === 'terminal' ? (
               <TerminalWorkspace
@@ -754,8 +765,8 @@ export function App(): ReactElement {
                   : <EditorWorkspace activeFileContent={activeFileContent} activeFilePath={activeFilePath} />}
               </Suspense>
             )}
-          </div>
-        </section>
+          </div>}
+        </ProjectStudioChrome>
       )}
     </PivotAppShell>
   )

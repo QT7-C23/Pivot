@@ -69,7 +69,7 @@ describe('Figma command palette', () => {
       onQueryChange: () => undefined,
     }))
 
-    expect(html).toContain('data-figma-screen="597:5670"')
+    expect(html).toContain('data-figma-screen="818:21302"')
     expect(html).toContain('role="dialog"')
     expect(html).toContain('role="combobox"')
     expect(html).toContain('aria-keyshortcuts="ArrowUp ArrowDown Enter Escape"')

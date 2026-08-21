@@ -166,7 +166,7 @@ function createWindow(): void {
         if (process.env['PIVOT_E2E_DESKTOP'] === '1') {
           await webContents.executeJavaScript(`(async () => {
             for (let attempt = 0; attempt < 120; attempt += 1) {
-              if (document.querySelector('main.welcome-screen, main.pv-app-shell')) break;
+              if (document.querySelector('main.welcome-screen:not([aria-busy="true"]), main.pv-app-shell')) break;
               await new Promise((resolve) => requestAnimationFrame(() => resolve()));
             }
             await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -183,7 +183,7 @@ function createWindow(): void {
             }
             return null;
           };
-          await waitFor('main.welcome-screen, main.pv-app-shell');
+          await waitFor('main.welcome-screen:not([aria-busy="true"]), main.pv-app-shell');
           if (${JSON.stringify(process.env['PIVOT_E2E_WORKBENCH'] === '1')}) {
             document.querySelector('button[data-route="sessions"]')?.click();
             await waitFor('.route-sessions');
@@ -203,16 +203,16 @@ function createWindow(): void {
           let automationPresence = null;
           if (${JSON.stringify(process.env['PIVOT_E2E_AUTOMATIONS'] === '1')}) {
             document.querySelector('button[data-route="automations"]')?.click();
-            const workspace = await waitFor('.pv-automation-empty-layout');
-            const createButton = workspace?.querySelector('.pv-automation-empty-actions .primary');
-            const browseButton = workspace?.querySelector('.pv-automation-empty-actions button:not(.primary)');
+            const workspace = await waitFor('.pv-automation-home');
+            const createButton = workspace?.querySelector('.pv-automation-zero button:first-child');
+            const browseButton = workspace?.querySelector('.pv-automation-zero button:last-child');
             automationPresence = workspace ? {
-              browseEnabled: browseButton && !browseButton.disabled,
+              browseEnabled: Boolean(browseButton && !browseButton.disabled),
               createDisabled: Boolean(createButton?.disabled),
-              examples: workspace.querySelectorAll('.pv-automation-example').length,
+              examples: workspace.querySelectorAll('.pv-automation-list > button').length,
               figmaScreen: workspace.getAttribute('data-figma-screen'),
               navigatedToMarketplace: false,
-              pipelines: workspace.querySelectorAll('.pv-automation-pipelines').length,
+              pipelines: workspace.querySelectorAll('.pv-automation-list').length,
               visible: workspace.getBoundingClientRect().width > 0
             } : null;
             browseButton?.click();
@@ -221,12 +221,12 @@ function createWindow(): void {
           let extensionPresence = null;
           if (${JSON.stringify(process.env['PIVOT_E2E_EXTENSIONS'] === '1')}) {
             document.querySelector('button[data-route="extensions"]')?.click();
-            const workspace = await waitFor('.pv-extensions-empty-layout');
-            const browseButton = workspace?.querySelector('.pv-extensions-empty-state > button');
+            const workspace = await waitFor('.pv-toolkit');
+            const browseButton = workspace?.querySelector('.pv-extension-empty button');
             extensionPresence = workspace ? {
-              browseEnabled: browseButton && !browseButton.disabled,
+              browseEnabled: Boolean(browseButton && !browseButton.disabled),
               figmaScreen: workspace.getAttribute('data-figma-screen'),
-              installedRows: workspace.querySelectorAll('.pv-extensions-empty-context > div').length,
+              installedRows: workspace.querySelectorAll('.pv-toolkit-list > article').length,
               navigatedToMarketplace: false,
               searchInputs: workspace.querySelectorAll('input[type="search"]').length,
               visible: workspace.getBoundingClientRect().width > 0
@@ -266,7 +266,7 @@ function createWindow(): void {
           }
           let newProjectPresence = null;
           if (${JSON.stringify(process.env['PIVOT_E2E_NEW_PROJECT'] === '1')}) {
-            const newProjectButton = await waitFor('.pv-now-primary-action');
+            const newProjectButton = await waitFor('.pv-dashboard-greeting button.primary');
             newProjectButton?.click();
             const dialog = await waitFor('.pv-new-project-dialog');
             const nameInput = document.querySelector('[data-new-project-field="name"]');
@@ -369,16 +369,17 @@ function createWindow(): void {
             })(),
             nowPresence: (() => {
               const workspace = document.querySelector('.pv-now-workspace');
-              const newCard = workspace?.querySelector('.pv-new-grid button');
+              const metric = workspace?.querySelector('.pv-dashboard-metric');
               const context = document.querySelector('.pv-workspace-context');
               const railItem = document.querySelector('.pv-rail-button');
               return workspace ? {
-                cardBackground: newCard ? getComputedStyle(newCard).backgroundColor : '',
+                cardBackground: metric ? getComputedStyle(metric).backgroundColor : '',
                 canvasBackground: getComputedStyle(workspace).backgroundColor,
                 contextVariant: context?.getAttribute('data-context-variant') ?? '',
                 hasLegacyControls: Boolean(document.querySelector('.project-card, .sidebar-search, .session-group-create')),
+                metrics: workspace.querySelectorAll('.pv-dashboard-metric').length,
                 railItemHeight: railItem ? Math.round(railItem.getBoundingClientRect().height) : 0,
-                sections: workspace.querySelectorAll('.pv-now-section').length,
+                sections: workspace.querySelectorAll('.pv-dashboard-panel').length,
                 theme: document.documentElement.dataset.theme ?? '',
                 visible: workspace.getBoundingClientRect().width > 0
               } : null;
@@ -448,7 +449,7 @@ function createWindow(): void {
         timelinePresence?: { filters: number; height: number; visible: boolean } | null
         previewPresence?: { devices: number; hasAddress: boolean; hasGuest: boolean; height: number; visible: boolean } | null
         runtimePresence?: { profiles: number; hasRecoveryCopy: boolean; visible: boolean } | null
-        nowPresence?: { cardBackground: string; canvasBackground: string; contextVariant: string; hasLegacyControls: boolean; railItemHeight: number; sections: number; theme: string; visible: boolean } | null
+        nowPresence?: { cardBackground: string; canvasBackground: string; contextVariant: string; hasLegacyControls: boolean; metrics: number; railItemHeight: number; sections: number; theme: string; visible: boolean } | null
         workPresence?: { columns: number; contextHeaderHeight: number; contextSections: number; hasInspector: boolean; view: string; visible: boolean } | null
         projectPresence?: { cards: number; columns: number; empty: boolean; figmaScreen: string | null; tabs: number; visible: boolean } | null
         automationPresence?: { browseEnabled: boolean; createDisabled: boolean; examples: number; figmaScreen: string | null; navigatedToMarketplace: boolean; pipelines: number; visible: boolean } | null
@@ -502,10 +503,11 @@ function createWindow(): void {
         )
         const nowPassed = process.env['PIVOT_E2E_NOW'] !== '1' || Boolean(
           result.nowPresence?.visible
-          && result.nowPresence.sections === 5
+          && result.nowPresence.sections === 8
+          && result.nowPresence.metrics === 4
           && result.nowPresence.theme === 'light'
           && result.nowPresence.cardBackground === 'rgb(255, 255, 255)'
-          && result.nowPresence.contextVariant === 'now'
+          && result.nowPresence.contextVariant === ''
           && result.nowPresence.hasLegacyControls === false
           && result.nowPresence.railItemHeight === 48
         )
@@ -527,16 +529,15 @@ function createWindow(): void {
           result.automationPresence?.visible
           && result.automationPresence.browseEnabled
           && result.automationPresence.createDisabled
-          && result.automationPresence.examples === 3
-          && result.automationPresence.figmaScreen === '597:6278'
+          && result.automationPresence.examples === 0
+          && result.automationPresence.figmaScreen === '1499:11725'
           && result.automationPresence.navigatedToMarketplace
           && result.automationPresence.pipelines === 1
         )
         const extensionPassed = process.env['PIVOT_E2E_EXTENSIONS'] !== '1' || Boolean(
           result.extensionPresence?.visible
-          && result.extensionPresence.browseEnabled
-          && result.extensionPresence.figmaScreen === '597:6403'
-          && result.extensionPresence.installedRows === 1
+          && result.extensionPresence.figmaScreen === '1476:8909'
+          && result.extensionPresence.installedRows === 0
           && result.extensionPresence.navigatedToMarketplace
           && result.extensionPresence.searchInputs === 1
         )
@@ -551,7 +552,7 @@ function createWindow(): void {
         const expectedNewProjectPath = path.join(process.env['PIVOT_E2E_NEW_PROJECT_PARENT'] ?? '', 'smoke-project')
         const newProjectPassed = process.env['PIVOT_E2E_NEW_PROJECT'] !== '1' || Boolean(
           result.newProjectPresence?.opened
-          && result.newProjectPresence.figmaScreen === '597:5842'
+          && result.newProjectPresence.figmaScreen === '818:21434'
           && result.newProjectPresence.closedAfterCreate
           && result.newProjectPresence.enteredSession
           && existsSync(expectedNewProjectPath)

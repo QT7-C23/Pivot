@@ -101,7 +101,7 @@ describe('Settings workspace structure', () => {
 
   it('tracks every designed provider state as an explicit Figma screen contract', () => {
     const workspace = readFileSync(path.join(rendererRoot, 'components/settings-workspace-v2.tsx'), 'utf8')
-    for (const node of ['126:4616', '126:4848', '126:5089', '126:5324', '134:2399', '134:2685', '134:2971', '216:4078', '227:4311']) {
+    for (const node of ['1171:9637', '1171:11360', '1405:10653', '1405:11063', '1405:11501', '1405:11877', '1406:11244', '1406:11690', '1406:12069', '1406:12440']) {
       expect(workspace).toContain(node)
     }
   })

@@ -14,27 +14,34 @@ describe('Pivot UI V2 visual system contract', () => {
     expect(v2Index).toBeGreaterThan(compatibilityIndex)
   })
 
-  it('implements the AppShell dimensions and responsive panel contract from Figma', () => {
+  it('implements the fixed AppShell dimensions and panel contract from Figma', () => {
     const css = readFileSync(path.join(rendererRoot, 'pivot-v2.css'), 'utf8')
+    const designSystem = readFileSync(path.join(rendererRoot, 'pivot-design-system.css'), 'utf8')
     for (const selector of ['.pv-app-shell', '.pv-global-rail', '.pv-titlebar', '.pv-context-sidebar', '.pv-studio-stage', '.pv-activity-panel']) {
       expect(css).toContain(selector)
     }
     expect(css).toContain('grid-template-columns: 52px minmax(0, 1fr)')
     expect(css).toContain('grid-template-rows: 44px minmax(0, 1fr)')
     expect(css).toContain('grid-template-columns: 264px minmax(0, 1fr) 320px')
-    expect(css).toContain('@media (max-width: 1439px)')
-    expect(css).toContain('.pv-shell-content.has-context .pv-context-sidebar { display: none; }')
+    expect(designSystem).toContain('--pv-design-canvas-width: 1440px')
+    expect(designSystem).toContain('--pv-design-canvas-height: 900px')
+    expect(css).not.toMatch(/@media \(max-width:/)
   })
 
-  it('implements the Figma dashboard grid with a compact responsive fallback', () => {
+  it('implements the complete Figma Dashboard/1440 information hierarchy without demo data', () => {
     const css = readFileSync(path.join(rendererRoot, 'pivot-v2.css'), 'utf8')
+    const dashboard = readFileSync(path.join(rendererRoot, 'components/dashboard-workspace.tsx'), 'utf8')
 
-    expect(css).toContain('.pv-now-summary-grid')
+    expect(css).toContain('.pv-dashboard-metrics')
     expect(css).toContain('grid-template-columns: repeat(4, minmax(0, 1fr))')
-    expect(css).toContain('.pv-now-dashboard')
-    expect(css).toContain('grid-template-columns: minmax(0, 1fr) 320px')
-    expect(css).toContain('.pv-now-secondary')
-    expect(css).toContain('.pv-now-dashboard { grid-template-columns: minmax(0, 1fr); }')
+    for (const region of ['greeting', 'attention', 'agent-activity', 'active-tasks', 'runs', 'continue', 'artifacts']) {
+      expect(dashboard).toContain(`pv-dashboard-${region}`)
+    }
+    expect(dashboard).toContain('operations: AgentOperation[]')
+    expect(dashboard).toContain('data-figma-screen="1026:8514"')
+    expect(dashboard).not.toMatch(/Good afternoon, Alex|Claude Opus|56 tasks|IPC debug failed/)
+    expect(dashboard).not.toContain('<h1>{copy.title}</h1>')
+    expect(css).not.toMatch(/@media \(max-width:/)
   })
 
   it('uses one route-driven shell instead of separate chat and IDE products', () => {

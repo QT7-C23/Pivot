@@ -12,7 +12,6 @@ import './inspector.css'
 import './pivot-012.css'
 import './pivot-v2.css'
 import './pivot-design-system.css'
-import './pivot-design-system.css'
 
 const storedTheme = localStorage.getItem('pivot:theme')
 const hasExplicitTheme = localStorage.getItem('pivot:theme-explicit') === '1'

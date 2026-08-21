@@ -13,6 +13,7 @@ describe('New Project production smoke contract', () => {
     expect(script).toContain('PIVOT_E2E_NEW_PROJECT_PARENT')
     expect(main).toContain("process.env['PIVOT_E2E_NEW_PROJECT'] === '1'")
     expect(main).toContain("waitFor('.pv-new-project-dialog')")
+    expect(main).toContain("waitFor('.pv-dashboard-greeting button.primary')")
     expect(main).toContain("valueSetter?.call(nameInput, 'smoke-project')")
     expect(main).toContain("waitFor('.route-sessions')")
     expect(main).toContain('newProjectPresence')

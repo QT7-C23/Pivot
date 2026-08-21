@@ -26,10 +26,11 @@ describe('Settings placeholder integrity', () => {
     expect(appearance).not.toContain('Line numbers')
   })
 
-  it('allows settings content and controls to reflow at the minimum app width', () => {
+  it('preserves the settings desktop columns on the fixed Figma canvas', () => {
     const css = readFileSync(path.resolve('src/renderer/pivot-v2.css'), 'utf8')
-    expect(css).toMatch(/@media \(max-width: 940px\)[\s\S]*\.pv-settings-layout\s*\{[^}]*grid-template-columns:\s*190px minmax\(0, 1fr\)/s)
-    expect(css).toMatch(/@media \(max-width: 940px\)[\s\S]*\.pv-setting-row\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/s)
+    expect(css).toMatch(/\.pv-settings-layout\s*\{[^}]*grid-template-columns:\s*260px minmax\(0, 1fr\)/s)
+    expect(css).toMatch(/\.pv-setting-row\s*\{[^}]*grid-template-columns:\s*minmax\(220px, 1fr\) minmax\(170px, auto\)/s)
+    expect(css).not.toMatch(/@media \(max-width:/)
     expect(css).toMatch(/\.pv-setting-action\s*\{[^}]*flex-wrap:\s*wrap/s)
   })
 })
