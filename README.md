@@ -2,7 +2,12 @@
 
 Pivot is an Electron-based AI Agent coding workbench. It combines conversation, project files, safe Agent edits, hunk-level Diff Review, multiple terminals, structured Plan execution, and BYOK model providers in one desktop interface.
 
-Current internal build: `Beta-2.0.21` (`2.0.21-beta`).
+> **Beta notice:** Pivot `Beta-2.0.22` is a public testing build. It is not a stable production release.
+> Features and data formats may change, some
+> surfaces remain incomplete, and compatibility-breaking updates are possible.
+> Back up important work before use.
+
+Current public testing build: `Beta-2.0.22` (`2.0.22-beta`).
 
 ## Open source
 
@@ -72,18 +77,18 @@ Windows builds default to the compatible software-rendering startup path. Set `P
 - Provider secrets stay in Main and are encrypted by the operating system.
 - Stable architecture and readiness notes live in [`docs/`](./docs/).
 
-## Internal-beta release boundary
+## Beta release boundary
 
 `npm.cmd run verify:beta2` runs tests, TypeScript/production build, Electron
 native dependency verification, the bundle performance budget, and the
 production-build Now smoke path. It does not build an installer or portable
 package.
 
-The Beta-2.0 internal baseline is not itself a public signed release. The
-repository now contains fail-closed signing/publishing automation and static
-release qualification. A trusted Windows certificate, protected GitHub
-credentials, independent source-repository traceability, and a real two-signed-
-version upgrade/rollback drill remain operator-controlled prerequisites.
+Public Beta builds are testing releases, not stable production releases. The
+repository contains fail-closed signing and publishing automation; a GitHub
+Release is qualified only when its Windows installer passes Authenticode and
+packaged smoke checks. The first signed Beta establishes the baseline needed
+for a later real previous-version upgrade/rollback and interruption drill.
 
 ## License
 

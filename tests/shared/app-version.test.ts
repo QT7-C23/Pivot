@@ -9,8 +9,8 @@ describe('application version contract', () => {
       readFileSync(path.resolve('package.json'), 'utf8'),
     ) as { version: string }
 
-    expect(APP_VERSION).toBe('Beta-2.0.21')
-    expect(APP_RELEASE_VERSION).toBe('2.0.21-beta')
+    expect(APP_VERSION).toBe('Beta-2.0.22')
+    expect(APP_RELEASE_VERSION).toBe('2.0.22-beta')
     expect(packageJson.version).toBe(APP_RELEASE_VERSION)
   })
 })

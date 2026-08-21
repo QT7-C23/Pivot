@@ -13,8 +13,8 @@ describe('Beta-2.x internal release qualification contract', () => {
       version: string
     }
 
-    expect(APP_VERSION).toBe('Beta-2.0.21')
-    expect(APP_RELEASE_VERSION).toBe('2.0.21-beta')
+    expect(APP_VERSION).toBe('Beta-2.0.22')
+    expect(APP_RELEASE_VERSION).toBe('2.0.22-beta')
     expect(packageJson.version).toBe(APP_RELEASE_VERSION)
     expect(packageJson.scripts['verify:beta2']).toBe(
       'npm run verify:mvp && npm run verify:performance && node scripts/e2e-smoke.mjs --now',
