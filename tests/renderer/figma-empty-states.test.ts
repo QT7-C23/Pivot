@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { ProjectOverviewWorkspace } from '../../src/renderer/components/project-overview-workspace'
-import { AutomationWorkspace } from '../../src/renderer/components/automation-workspace'
+import { AutomationWorkspace } from '../../src/renderer/components/automation-workspace-v2'
 import { ExtensionsEmptyWorkspace } from '../../src/renderer/components/extensions-empty-workspace'
 import { LocaleProvider } from '../../src/renderer/i18n/locale-context'
 
@@ -64,7 +64,7 @@ describe('Figma production empty states', () => {
     expect(main).toContain("figmaScreen === '597:6165'")
   })
 
-  it('renders No Automations node 597:6278 without pretending the scheduler exists', () => {
+  it('renders the current Automations home without copying Figma demo data', () => {
     const html = renderToStaticMarkup(createElement(
       LocaleProvider,
       null,
@@ -74,14 +74,12 @@ describe('Figma production empty states', () => {
       }),
     ))
 
-    expect(html).toContain('data-figma-screen="597:6278"')
-    expect(html).toContain('class="pv-automation-empty-state"')
-    expect(html).toContain('尚无自动化')
-    expect(html).toContain('创建自动化')
-    expect(html).toContain('浏览模板')
+    expect(html).toContain('data-figma-screen="1499:11725"')
+    expect(html).toContain('class="pv-automation-zero"')
+    expect(html).toContain('No automations yet')
     expect(html).toContain('disabled=""')
-    expect(html.match(/class="pv-automation-example"/g)).toHaveLength(3)
-    expect(html).not.toContain('pv-automation-inspector')
+    expect(html).not.toContain('Auto-format on save')
+    expect(html).not.toContain('156')
   })
 
   it('wires automation templates to the owned marketplace route', () => {
@@ -90,7 +88,7 @@ describe('Figma production empty states', () => {
     const smoke = readFileSync(path.join(process.cwd(), 'scripts/e2e-smoke.mjs'), 'utf8')
     expect(app).toContain("<AutomationWorkspace onBrowseTemplates={() => navigate('marketplace')}")
     expect(smoke).toContain("process.argv.includes('--automations')")
-    expect(main).toContain("figmaScreen === '597:6278'")
+    expect(main).toContain("figmaScreen === '1499:11725'")
   })
 
   it('renders No Extensions node 597:6403 with an honest empty inventory', () => {
@@ -108,13 +106,20 @@ describe('Figma production empty states', () => {
     expect(html).not.toMatch(/install now|立即安装|suggested extensions|推荐扩展/i)
   })
 
-  it('routes the Extensions empty state to the existing marketplace', () => {
+  it('routes Toolkit to the production marketplace-backed inventory through a real empty-state action', () => {
     const app = readFileSync(path.join(process.cwd(), 'src/renderer/pivot-app.tsx'), 'utf8')
     const main = readFileSync(path.join(process.cwd(), 'src/main/main.ts'), 'utf8')
+    const page = readFileSync(path.join(process.cwd(), 'src/renderer/components/plugin-ecosystem-page.tsx'), 'utf8')
     const smoke = readFileSync(path.join(process.cwd(), 'scripts/e2e-smoke.mjs'), 'utf8')
-    expect(app).toContain("<ExtensionsEmptyWorkspace onBrowseMarketplace={() => navigate('marketplace')} />")
-    expect(app).not.toContain('surface="extensions"')
+    expect(app).toContain("onBrowseMarketplace={() => navigate('marketplace')}")
+    expect(app).toContain('surface="extensions"')
+    expect(page).toContain('onBrowseMarketplace')
+    expect(page).toContain('Browse Marketplace')
     expect(smoke).toContain("process.argv.includes('--extensions')")
-    expect(main).toContain("figmaScreen === '597:6403'")
+    expect(main).toContain("figmaScreen === '1476:8909'")
+    expect(main).toContain('browseButton?.click()')
+    expect(main).toContain("Boolean(await waitFor('.surface-marketplace'))")
+    expect(main).not.toContain('browseEnabled: true')
+    expect(main).not.toContain('navigatedToMarketplace = true')
   })
 })

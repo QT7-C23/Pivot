@@ -31,28 +31,35 @@ export function AgentStatusPanel({
 }: AgentStatusPanelProps): ReactElement {
   const { t } = useLocale()
   const totalTokens = tokenUsage.in + tokenUsage.out
-  const [activeTab, setActiveTab] = useState<'activity' | 'inspector'>('inspector')
+  const [activeTab, setActiveTab] = useState<'context' | 'history' | 'agent'>('context')
 
   return (
-    <aside aria-label={t('agent.status')} className="pv-conversation-inspector" data-figma-region="conversation-inspector">
+    <aside aria-label={t('agent.status')} className="pv-conversation-inspector" data-figma-region="conversation-inspector" data-figma-screen={activeTab === 'history' ? '818:14447' : activeTab === 'agent' ? '818:14878' : '818:12754'}>
         <header>
-          <button className={activeTab === 'activity' ? 'active' : ''} onClick={() => setActiveTab('activity')} type="button">Activity</button>
-          <button className={activeTab === 'inspector' ? 'active' : ''} onClick={() => setActiveTab('inspector')} type="button">Inspector</button>
+          <button className={activeTab === 'context' ? 'active' : ''} onClick={() => setActiveTab('context')} type="button">Context</button>
+          <button className={activeTab === 'history' ? 'active' : ''} onClick={() => setActiveTab('history')} type="button">History</button>
+          <button className={activeTab === 'agent' ? 'active' : ''} onClick={() => setActiveTab('agent')} type="button">Agent</button>
         </header>
-        {activeTab === 'activity' ? (
+        {activeTab === 'history' ? (
           <div className="pv-conversation-activity">
             {operations.length === 0 ? <p>{t('agent.operationsEmpty')}</p> : operations.map((operation, index) => (
               <div key={operation.id}><small>{formatOperationIndex(index)}</small>{operation.status === 'done' ? <Check size={12} /> : <Circle size={12} />}<span>{operation.description}</span></div>
             ))}
+          </div>
+        ) : activeTab === 'agent' ? (
+          <div className="pv-conversation-properties pv-agent-properties">
+            <h2>{agentLabel}</h2>
+            <InfoLine label="State" value={agentState} />
+            <InfoLine label="Task" value={currentTask ?? t('agent.ready')} />
+            <InfoLine label="Phase" value={streamPhase ?? 'idle'} />
+            {permissionRequests.length > 0 && <div className="pv-conversation-permission"><ShieldAlert size={13} /><span>{t('agent.permissionRequests', { count: permissionRequests.length })}</span></div>}
           </div>
         ) : (
           <div className="pv-conversation-properties">
             <InfoLine label="Model" value={agentLabel} />
             <InfoLine label="State" value={agentState} />
             <InfoLine label="Task" value={currentTask ?? t('agent.ready')} />
-            <InfoLine label="Phase" value={streamPhase ?? 'idle'} />
             <InfoLine label="Tokens" value={formatNumber(totalTokens)} />
-            {permissionRequests.length > 0 && <div className="pv-conversation-permission"><ShieldAlert size={13} /><span>{t('agent.permissionRequests', { count: permissionRequests.length })}</span></div>}
           </div>
         )}
         {isStreaming && <button className="pv-conversation-stop" onClick={() => void abortStream()} type="button"><Square size={12} />{t('agent.stop')}</button>}

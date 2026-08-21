@@ -1,7 +1,7 @@
 # Pivot release gap assessment
 
 Assessment date: 2026-08-21  
-Code baseline: Beta-2.0.21 (`2.0.21-beta`)
+Code baseline: Beta-2.0.22 (`2.0.22-beta`)
 
 This is a weighted engineering estimate against the product package Roadmap, not a percentage inferred from the semantic version. Confidence is medium and the error band is approximately +/- 7 percentage points because release quality, ecosystem adoption, and model behavior are not linear feature counts.
 
@@ -1633,7 +1633,34 @@ Keep release qualification as the final independent slice.
 - Verification passed with 357 test files / 1259 tests, strict TypeScript,
   formal build, performance budget, matching Electron native dependencies,
   production-build Now smoke and zero official npm production vulnerabilities.
-- No installer, portable package, Git tag or release was generated. A trusted
-  certificate, protected GitHub authority, independent project Git root, two
-  signed-version upgrade/rollback drill, official Catalog ceremony and
-  independent Plugin sandbox decision remain external operations.
+- No installer, portable package, Git tag or release was generated in that
+  slice. The public repository, independent project Git root and protected
+  GitHub authority are now configured; a trusted certificate, two signed-
+  version upgrade/rollback drill, official Catalog ceremony and independent
+  Plugin sandbox decision remain external operations.
+
+## Completed current Figma V2 UI integration and first-release preparation (2026-08-21)
+
+- Advanced the public testing build to `Beta-2.0.22` (`2.0.22-beta`) and added
+  a prominent README warning that this remains Beta testing software rather
+  than a stable production release.
+- Integrated the current Dashboard, Profile, shared Project Studio,
+  Automations, Database, Toolkit, Marketplace detail, Provider-state and
+  onboarding screens. Runtime values come from owned state; unavailable
+  Database, Model Hub and Automation capabilities do not display Figma sample
+  records as production data.
+- Added strict local Profile preference validation, persisted onboarding and
+  dashboard preferences, the reviewed brand mark, and the current Figma screen
+  manifest.
+- Replaced hard-coded E2E navigation success values with real enabled-control
+  checks, clicks and Marketplace route observation. The onboarding E2E proves
+  the current Dashboard entry and persistence after process restart.
+- Verification passed with 360 test files / 1269 tests, strict TypeScript,
+  formal Electron production build, route E2E, separate Dashboard,
+  Automations and Toolkit production smoke runs, and the performance budget
+  (1.74 MiB initial Renderer; 4.18 MiB largest application chunk; 23.31 MiB
+  total JavaScript).
+- No installer, Git tag or GitHub Release is claimed by this repository-owned
+  slice. The first public binary Release remains blocked until compliant
+  Windows signing authority is stored in the protected environment and the
+  signed artifact qualification workflow passes.

@@ -1,13 +1,13 @@
 # Internal Beta Readiness
 
-Last automated review: 2026-08-21 (Beta-2.0.21).
+Last automated review: 2026-08-21 (Beta-2.0.22).
 
 ## Verified gates
 
-- `npm test`: 357 test files, 1259 behavioral, failure-path, system and structural tests.
+- `npm test`: 360 test files, 1269 behavioral, failure-path, system and structural tests.
 - `npm run build`: TypeScript strict check and production Electron/Vite bundles pass.
 - `npm run verify:mvp`: tests, build, and Electron native ABI verification pass.
-- `npm run verify:performance`: initial Renderer 1.73 MiB; largest application chunk 4.18 MiB; largest Worker 11.53 MiB; total JavaScript 23.18 MiB, all within separate explicit budgets.
+- `npm run verify:performance`: initial Renderer 1.74 MiB; largest application chunk 4.18 MiB; largest Worker 11.53 MiB; total JavaScript 23.31 MiB, all within separate explicit budgets.
 - Electron smoke: real BrowserWindow, context-isolated preload, all ten settings pages, missing-CLI maintenance contract, and application-update contract pass; latest packaged settings ready time 0.679 seconds.
 - Packaged smoke (`npm run test:e2e:packaged`): welcome, settings, and focused-workbench startup paths pass; the workbench contract verifies a 328 px decision-context panel whose content stretches to the available width.
 - Playwright Electron E2E now covers six real flows: conversation streaming, checkpointed Diff acceptance, pointer spotlight behavior, all-free plugin policy, honest unavailable update state, and Preview loading from a local HTTP server with device switching.
@@ -50,9 +50,9 @@ Last automated review: 2026-08-21 (Beta-2.0.21).
 - The canonical `QT7-C23/Pivot` source repository is required to be public under
   Apache-2.0; `package.json` remains npm-private only to prevent accidental
   registry publication.
-- The complete preflight remains blocked without an independent Pivot Git root,
-  remote traceability, protected GitHub publishing authority and trusted Windows
-  signing authority.
+- The independent Pivot Git root, public remote traceability and protected
+  GitHub environment are configured. The complete preflight remains blocked
+  without trusted Windows signing authority.
 - A signed installer has not been generated in this slice. Public distribution
   still requires two real signed versions for previous-to-current update,
   interruption and rollback evidence.

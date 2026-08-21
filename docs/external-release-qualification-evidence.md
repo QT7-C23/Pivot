@@ -1,7 +1,7 @@
-# Beta-2.0.21 external release qualification evidence
+# Beta-2.0.22 external release qualification evidence
 
-Date: 2026-08-21  
-Version: Beta-2.0.21 (`2.0.21-beta`)  
+Date: 2026-08-21
+Version: Beta-2.0.22 (`2.0.22-beta`)
 Scope: repository-owned release engineering only; no installer, portable package,
 Git tag, GitHub release or Marketplace Catalog was produced.
 
@@ -37,27 +37,30 @@ Git tag, GitHub release or Marketplace Catalog was produced.
 
 ## Automated verification
 
-- 357 test files / 1259 tests passed.
+- 360 test files / 1269 tests passed.
 - Strict TypeScript and formal Electron/Vite production build passed.
 - Performance gate passed: 1.73 MiB initial Renderer, 4.18 MiB largest
-  application chunk, 11.53 MiB largest Worker and 23.18 MiB total JavaScript.
+  application chunk, 11.53 MiB largest Worker and 23.31 MiB total JavaScript.
 - Electron native dependency verification passed.
-- Production-build Now smoke passed in Chinese/light mode at 628 ms readiness.
+- Production-build Dashboard smoke passed in Chinese/light mode at 386 ms
+  readiness. Separate Automations and Toolkit runs proved their empty-state
+  actions navigate to the real Marketplace route.
 - npm official production dependency audit: 0 known vulnerabilities across
   138 production dependencies.
 - Repository-only external-release preflight passed.
 
 ## External conditions intentionally still blocked
 
-The complete preflight correctly remains blocked until an operator supplies:
+The public source repository, remote traceability, short-lived same-repository
+publishing authority and protected `external-release` review environment are
+now present. The complete preflight correctly remains blocked until an operator
+supplies:
 
-1. an independent Git repository rooted at the Pivot project directory and a
-   clean, remotely traceable release commit;
-2. protected same-repository GitHub publishing authority;
-3. either compliant PFX signing authority or Azure Trusted Signing authority;
-4. a first signed Beta baseline followed by a real signed previous-to-current
+1. either compliant PFX signing authority or Azure Trusted Signing authority;
+2. approval of the exact clean release commit in the protected environment;
+3. a first signed Beta baseline followed by a real signed previous-to-current
    update/interruption/rollback drill;
-5. an independent decision on the Wasm Plugin sandbox before official Plugin
+4. an independent decision on the Wasm Plugin sandbox before official Plugin
    content publication.
 
 The installed Codex Security connector reported `not_granted` on this date, so

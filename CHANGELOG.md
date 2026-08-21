@@ -3,6 +3,38 @@
 All notable Pivot changes are recorded here. Versions use legal SemVer in
 package metadata and the `Beta-x.y.z` display form in the application.
 
+## [2.0.22-beta] - 2026-08-21
+
+### Added
+
+- Figma V2 dashboard, profile, shared project studio, automation, database,
+  Toolkit, Marketplace detail, provider-state, onboarding and navigation
+  surfaces backed by owned runtime state or explicit unavailable states.
+- A strict local profile-preferences contract with bounded runtime validation.
+- A prominent README notice that the public build remains Beta testing
+  software and is not a stable production release.
+
+### Changed
+
+- Updated the Figma screen manifest, semantic styling, brand asset, navigation
+  hierarchy and production smoke selectors to the current UI design.
+- Removed placeholder provider usage, marketplace reviews, automation records
+  and database content where no production-owned source exists.
+
+### Fixed
+
+- Persisted onboarding completion across restarts and removed a duplicate
+  design-system stylesheet import.
+- Restored real empty-state navigation checks instead of treating hard-coded
+  E2E booleans as successful Marketplace navigation.
+
+### Known Beta limitations
+
+- Database, Model Hub and Automation creation remain explicitly unavailable
+  until their production capability contracts are connected.
+- This Beta release is not a stable production release; users should back up
+  important work before testing it.
+
 ## [2.0.21-beta] - 2026-08-21
 
 ### Added

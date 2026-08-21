@@ -7,7 +7,7 @@ const rendererRoot = path.resolve(process.cwd(), 'src/renderer')
 describe('Pivot UI V2 route and runtime contracts', () => {
   it('exposes every top-level workspace as an explicit route', () => {
     const source = readFileSync(path.join(rendererRoot, 'navigation/pivot-navigation.ts'), 'utf8')
-    for (const route of ['now', 'sessions', 'projects', 'work', 'artifacts', 'automations', 'docs', 'runtimes', 'marketplace', 'extensions', 'settings', 'help']) {
+    for (const route of ['now', 'sessions', 'projects', 'work', 'artifacts', 'automations', 'database', 'docs', 'runtimes', 'marketplace', 'extensions', 'settings', 'help']) {
       expect(source).toContain("'" + route + "'")
     }
   })
@@ -37,9 +37,10 @@ describe('Pivot UI V2 route and runtime contracts', () => {
     const now = readFileSync(path.join(rendererRoot, 'components/now-workspace.tsx'), 'utf8')
     const primaryNavigation = shell.slice(shell.indexOf('const PRIMARY_NAVIGATION'), shell.indexOf('const SECONDARY_NAVIGATION'))
 
-    for (const route of ['now', 'projects', 'automations', 'docs']) {
+    for (const route of ['now', 'projects', 'automations', 'database']) {
       expect(primaryNavigation).toContain(`route: '${route}'`)
     }
+    expect(primaryNavigation).not.toContain("route: 'docs'")
     for (const route of ['work', 'artifacts']) {
       expect(primaryNavigation).not.toContain(`route: '${route}'`)
     }
@@ -91,13 +92,12 @@ describe('Pivot UI V2 route and runtime contracts', () => {
     const css = readFileSync(path.join(rendererRoot, 'pivot-v2.css'), 'utf8')
 
     expect(app).toContain('<WorkspaceContextSidebar')
-    expect(app).toContain('variant="now"')
     expect(app).toContain('variant="project"')
     expect(sidebar).toContain("variant: 'now' | 'project'")
-    expect(sidebar).not.toContain('onChooseProject')
-    expect(sidebar).not.toContain('onSearchSessions')
-    expect(css).toContain('min-height: 48px')
-    expect(css).toContain('font-size: 10px')
+    expect(sidebar).toContain('groupByProject')
+    expect(sidebar).toContain('Search projects')
+    expect(css).toContain('.pv-project-sidebar-heading')
+    expect(css).toContain('.pv-project-session-group')
   })
 
   it('implements Figma Project Overview as an independent data-backed screen', () => {
@@ -113,15 +113,15 @@ describe('Pivot UI V2 route and runtime contracts', () => {
     expect(project).not.toContain('will live here')
   })
 
-  it('implements Figma Artifact Review with explicit three-column ownership', () => {
+  it('implements Figma Diff inside the shared project shell', () => {
     const app = readFileSync(path.join(rendererRoot, 'pivot-app.tsx'), 'utf8')
-    const chrome = readFileSync(path.join(rendererRoot, 'components/artifact-review-chrome.tsx'), 'utf8')
+    const chrome = readFileSync(path.join(rendererRoot, 'components/project-studio-chrome.tsx'), 'utf8')
     const review = readFileSync(path.join(rendererRoot, 'components/file-review-workspace.tsx'), 'utf8')
 
-    expect(app).toContain('<ArtifactReviewContextSidebar')
-    expect(app).toContain('<ArtifactReviewInspector')
-    expect(review).toContain('data-figma-screen="64:822"')
-    expect(chrome).toContain('FileReviewRecord')
+    expect(app).toContain("activeProjectTab === 'diff' ? '818:16236'")
+    expect(app).toContain('<ProjectStudioChrome')
+    expect(chrome).toContain("'chat' | 'tasks' | 'diff' | 'runs' | 'preview' | 'terminal'")
+    expect(review).toContain('<CodeDiffEditor')
     expect(review).not.toContain('diff-hunk-list')
   })
 
@@ -130,36 +130,37 @@ describe('Pivot UI V2 route and runtime contracts', () => {
     const inspector = readFileSync(path.join(rendererRoot, 'components/agent-status-panel.tsx'), 'utf8')
     const conversationBlock = app.slice(app.indexOf("{activeRoute === 'sessions'"), app.indexOf('</PivotAppShell>'))
 
-    expect(conversationBlock).toContain('data-figma-screen="63:190"')
+    expect(conversationBlock).toContain('<ProjectStudioChrome')
+    expect(app).toContain("activeProjectTab === 'chat' ? '818:12754'")
     expect(conversationBlock).not.toContain('<WorkbenchTabButton')
     expect(app).not.toContain('<ConversationSidebar')
     expect(inspector).toContain('data-figma-region="conversation-inspector"')
-    expect(inspector).toContain("'activity' | 'inspector'")
+    expect(inspector).toContain("'context' | 'history' | 'agent'")
+    expect(inspector).toContain("'818:14447'")
+    expect(inspector).toContain("'818:14878'")
   })
 
   it('replaces the Automations placeholder with a typed Figma screen', () => {
     const app = readFileSync(path.join(rendererRoot, 'pivot-app.tsx'), 'utf8')
-    const automations = readFileSync(path.join(rendererRoot, 'components/automation-workspace.tsx'), 'utf8')
+    const automations = readFileSync(path.join(rendererRoot, 'components/automation-workspace-v2.tsx'), 'utf8')
 
     expect(app).toContain('<AutomationWorkspace')
     expect(app).not.toContain('<CapabilityWorkspace')
     expect(automations).toContain('AutomationWorkspaceSnapshot')
-    expect(automations).toContain('data-figma-screen="71:1234"')
-    expect(automations).not.toContain('Run Now')
-    expect(automations).not.toContain('Delete')
+    for (const node of ['1499:11725', '1499:12679', '1499:12887']) expect(automations).toContain(node)
+    expect(automations).not.toContain('Auto-format on save')
+    expect(automations).not.toContain('156')
   })
 
-  it('separates the real provider marketplace from the empty installed-extension inventory', () => {
+  it('backs both Marketplace and Toolkit with verified marketplace state', () => {
     const app = readFileSync(path.join(rendererRoot, 'pivot-app.tsx'), 'utf8')
     const marketplace = readFileSync(path.join(rendererRoot, 'components/plugin-ecosystem-page.tsx'), 'utf8')
-    const extensions = readFileSync(path.join(rendererRoot, 'components/extensions-empty-workspace.tsx'), 'utf8')
 
     expect(app).toContain('surface="marketplace"')
-    expect(app).toContain('<ExtensionsEmptyWorkspace')
-    expect(marketplace).toContain('useProviderStore')
-    expect(marketplace).toContain('plugin-policy-card')
-    expect(extensions).toContain('data-figma-screen="597:6403"')
-    expect(`${marketplace}\n${extensions}`).not.toMatch(/price|purchase|subscribe|checkout|trial/i)
+    expect(app).toContain('surface="extensions"')
+    expect(marketplace).toContain('useMarketplaceStore')
+    expect(marketplace).toContain('data-figma-screen="1476:8909"')
+    expect(marketplace).not.toMatch(/price|purchase|subscribe|checkout|trial/i)
   })
 
   it('wires the current Docs, Help, and attached Attention Queue screens to production state', () => {
@@ -173,7 +174,7 @@ describe('Pivot UI V2 route and runtime contracts', () => {
     expect(app).toContain('<AttentionCenter')
     expect(docs).toContain('data-figma-screen="549:3877"')
     expect(docs).toContain('FileTreeEntry')
-    expect(help).toContain('data-figma-screen="248:5476"')
+    expect(help).toContain('data-figma-screen="818:12562"')
     expect(attention).toContain('data-figma-state="425:6216"')
     expect(attention).toContain('PermissionRequest')
     for (const source of [docs, help, attention]) {

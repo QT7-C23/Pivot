@@ -4,6 +4,15 @@ import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 describe('external Windows release qualification', () => {
+  it('prominently identifies the public build as Beta testing software', () => {
+    const readme = readFileSync(path.resolve('README.md'), 'utf8')
+
+    expect(readme).toContain('Beta-2.0.22')
+    expect(readme).toMatch(/public testing build/i)
+    expect(readme).toMatch(/not a stable production release/i)
+    expect(readme).toMatch(/back up important work/i)
+  })
+
   it('keeps publishing explicit, signed, draft-only and compatible with the public Apache source repository', () => {
     const packageJson = readJson('package.json') as {
       build: { win: Record<string, unknown> }

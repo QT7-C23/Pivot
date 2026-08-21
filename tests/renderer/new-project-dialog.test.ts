@@ -22,7 +22,7 @@ describe('Figma New Project dialog', () => {
       }),
     ))
 
-    expect(html).toContain('data-figma-screen="597:5842"')
+    expect(html).toContain('data-figma-screen="818:21434"')
     expect(html).toContain('role="dialog"')
     expect(html).toContain('创建新项目')
     expect(html).toContain('项目名称')

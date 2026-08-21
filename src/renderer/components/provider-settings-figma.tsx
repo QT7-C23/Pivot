@@ -16,27 +16,22 @@ type ProviderTab = 'connections' | 'routing' | 'monitor'
 type ProviderState = 'active' | 'auth-failed' | 'disabled' | 'model-unavailable' | 'not-configured' | 'rate-limited' | 'testing' | 'unreachable'
 type ProviderView = Omit<ProviderConfigInput, 'apiKey'> & { capabilities: string[]; context: string; scope: string }
 
-const PROVIDER_STATE_SCREEN: Record<ProviderState, string> = {
-  active: '126:4263', 'not-configured': '126:4616', 'auth-failed': '126:4848', disabled: '126:5089',
-  unreachable: '126:5324', testing: '134:2399', 'rate-limited': '134:2685', 'model-unavailable': '134:2971',
-}
-
 const PROVIDERS: ProviderView[] = [
-  { id: 'anthropic', kind: 'anthropic', label: 'Anthropic — Personal', baseUrl: 'https://api.anthropic.com/v1', model: 'claude-sonnet-4', scope: 'Global', context: '200K context', capabilities: ['Chat', 'Completion', 'Vision', 'Tool Use', 'Streaming', 'Extended Thinking'] },
-  { id: 'anthropic-work', kind: 'anthropic', label: 'Anthropic — Work', baseUrl: 'https://api.anthropic.com/v1', model: 'claude-opus-4', scope: 'Workspace', context: '200K context', capabilities: ['Chat', 'Completion', 'Vision', 'Tool Use', 'Streaming'] },
-  { id: 'openai', kind: 'openai', label: 'OpenAI — Main', baseUrl: 'https://api.openai.com/v1', model: 'gpt-5', scope: 'Global', context: '128K context', capabilities: ['Chat', 'Vision', 'Tool Use', 'Streaming'] },
-  { id: 'google', kind: 'custom', label: 'Google AI — Disabled', baseUrl: 'https://generativelanguage.googleapis.com/v1beta', model: 'gemini-2.5-pro', scope: 'Global', context: '1M context', capabilities: ['Chat', 'Vision', 'Image'] },
+  { id: 'anthropic', kind: 'anthropic', label: 'Anthropic', baseUrl: 'https://api.anthropic.com/v1', model: 'configured-model', scope: 'Global', context: 'Provider defined', capabilities: ['Chat', 'Completion', 'Vision', 'Tool Use', 'Streaming'] },
+  { id: 'openai', kind: 'openai', label: 'OpenAI', baseUrl: 'https://api.openai.com/v1', model: 'configured-model', scope: 'Global', context: 'Provider defined', capabilities: ['Chat', 'Vision', 'Tool Use', 'Streaming'] },
+  { id: 'google', kind: 'custom', label: 'Google Gemini', baseUrl: 'https://generativelanguage.googleapis.com/v1beta', model: 'configured-model', scope: 'Global', context: 'Provider defined', capabilities: ['Chat', 'Vision', 'Image'] },
+  { id: 'mistral', kind: 'custom', label: 'Mistral', baseUrl: 'https://api.mistral.ai/v1', model: 'mistral-large-latest', scope: 'Global', context: '128K context', capabilities: ['Chat', 'Completion', 'Tool Use', 'Streaming'] },
+  { id: 'bedrock', kind: 'custom', label: 'AWS Bedrock', baseUrl: 'https://bedrock-runtime.us-east-1.amazonaws.com', model: 'configured-in-aws', scope: 'Global', context: 'Provider defined', capabilities: ['Chat', 'Completion', 'Tool Use'] },
   { id: 'ollama', kind: 'custom', label: 'Local Ollama', baseUrl: 'http://localhost:11434/v1', model: 'llama3.3', scope: 'Project', context: '128K context', capabilities: ['Chat', 'Completion', 'Embedding'] },
-  { id: 'corp-vllm', kind: 'custom', label: 'Corp vLLM', baseUrl: 'http://localhost:8000/v1', model: 'corp-coder', scope: 'Workspace', context: '128K context', capabilities: ['Chat', 'Completion', 'Streaming'] },
 ]
 
 const MODELS: Record<string, string[]> = {
   anthropic: ['claude-opus-4', 'claude-sonnet-4', 'claude-haiku-3.5'],
-  'anthropic-work': ['claude-opus-4', 'claude-sonnet-4', 'claude-haiku-3.5'],
   openai: ['gpt-5', 'gpt-5-mini', 'o3', 'gpt-4o', 'text-embedding-3'],
   google: ['gemini-2.5-pro', 'gemini-2.5-flash', 'imagen-4'],
+  mistral: ['mistral-large-latest'],
+  bedrock: ['configured-in-aws'],
   ollama: ['llama3.3', 'qwen3-coder', 'nomic-embed'],
-  'corp-vllm': ['corp-coder', 'corp-chat'],
 }
 
 const ADD_CONNECTION_PRESETS: ConnectionPreset[] = [
@@ -51,7 +46,7 @@ export function ModelsProvidersSettings(): ReactElement {
   const load = useProviderStore((state) => state.load)
   const [tab, setTab] = useState<ProviderTab>('connections')
   useEffect(() => { void load() }, [load])
-  return <section className="pv-provider-settings" data-figma-screen={tab === 'connections' ? '126:4263' : tab === 'routing' ? '216:4078' : '227:4311'}>
+  return <section className="pv-provider-settings" data-figma-screen={tab === 'routing' ? '1171:11360' : '1171:9637'}>
     <header className="pv-provider-page-intro"><h1>{zh ? '模型与提供商' : 'Models & Providers'}</h1><p>{zh ? '连接模型服务，并管理路由规则、默认模型和连接状态。' : 'Connect model services and manage routing rules, defaults, and connection health.'}</p></header>
     <nav className="pv-provider-tabs">{([['connections', zh ? '连接' : 'Connections'], ['routing', zh ? '路由' : 'Routing'], ['monitor', zh ? '监控' : 'Monitor']] as Array<[ProviderTab, string]>).map(([id, label]) => <button className={tab === id ? 'active' : ''} key={id} onClick={() => setTab(id)} type="button">{label}</button>)}</nav>
     {tab === 'connections' ? <Connections configs={configs} zh={zh} /> : tab === 'routing' ? <Routing configs={configs} zh={zh} /> : <Monitor configs={configs} zh={zh} />}
@@ -110,7 +105,7 @@ function Connections({ configs, zh }: { configs: ProviderConfig[]; zh: boolean }
   }
   return <div className="pv-provider-connections">
     <aside className="pv-provider-catalog"><header><strong>{zh ? '连接' : 'Connections'}</strong><button onClick={() => setShowAddConnection(true)} type="button"><Plus size={12} />{zh ? '添加' : 'Add'}</button></header><div className="pv-provider-catalog-tools"><label className="pv-provider-search"><Search size={13} /><input onChange={(event) => setQuery(event.target.value)} placeholder={zh ? '搜索连接…' : 'Search connections…'} value={query} /></label><select onChange={(event) => setFilter(event.target.value)} value={filter}><option value="all">{zh ? '全部' : 'All'}</option><option value="configured">{zh ? '已配置' : 'Configured'}</option><option value="local">{zh ? '本地' : 'Local'}</option></select></div>
-      <div className="pv-provider-list">{catalog.map((item) => { const itemState = providerState(configs.find((entry) => entry.id === item.id), results[item.id], disabled.includes(item.id), false); return <button className={provider.id === item.id ? 'active' : ''} key={item.id} onClick={() => setSelectedId(item.id)} type="button"><ProviderMark provider={item} /><span><span><i className={`state ${itemState}`} /><strong>{item.label}</strong><em>{item.scope}</em></span><small>{item.kind === 'custom' ? 'OpenAI-compatible' : item.kind === 'anthropic' ? 'Anthropic' : 'OpenAI'} · {(MODELS[item.id] ?? [item.model]).length} models</small><small className={`provider-status ${itemState}`}>{stateLabel(itemState, zh)} <b>{itemState === 'not-configured' ? (zh ? '从未测试' : 'Never tested') : (zh ? '2 分钟前测试' : 'Tested 2m ago')}</b></small></span></button> })}</div>
+      <div className="pv-provider-list">{catalog.map((item) => { const itemState = providerState(configs.find((entry) => entry.id === item.id), results[item.id], disabled.includes(item.id), false); return <button className={provider.id === item.id ? 'active' : ''} key={item.id} onClick={() => setSelectedId(item.id)} type="button"><ProviderMark provider={item} /><span><span><i className={`state ${itemState}`} /><strong>{item.label}</strong><em>{item.scope}</em></span><small>{item.kind === 'custom' ? 'OpenAI-compatible' : item.kind === 'anthropic' ? 'Anthropic' : 'OpenAI'}</small><small className={`provider-status ${itemState}`}>{stateLabel(itemState, zh)} <b>{results[item.id] ? (zh ? '本次会话已测试' : 'Tested this session') : (zh ? '本次会话未测试' : 'Not tested this session')}</b></small></span></button> })}</div>
     </aside>
     <ProviderDetail onCredential={() => void credential()} onDisable={(value) => setDisabled(value ? [...new Set([...disabled, provider.id])] : disabled.filter((id) => id !== provider.id))} onRemove={() => saved && !saved.isActive && setRemovalTarget(saved)} onTest={() => saved && void test(saved.id)} provider={provider} saved={saved} state={state} zh={zh} />
     {error && <div className="pv-provider-global-error" role="alert"><AlertTriangle size={14} />{error}</div>}
@@ -124,12 +119,12 @@ function Connections({ configs, zh }: { configs: ProviderConfig[]; zh: boolean }
 function ProviderDetail({ onCredential, onDisable, onRemove, onTest, provider, saved, state, zh }: { onCredential: () => void; onDisable: (disabled: boolean) => void; onRemove: () => void; onTest: () => void; provider: ProviderView; saved?: ProviderConfig; state: ProviderState; zh: boolean }): ReactElement {
   const issue = state === 'auth-failed' ? (zh ? '身份验证失败。API 密钥可能无效或已过期，请更新凭据。' : 'Authentication failed. The API key may be invalid or expired. Please update your credentials.') : state === 'disabled' ? (zh ? '此连接已禁用。该提供商的模型不会用于路由或直接使用。' : "This connection is disabled. Models from this provider won't be available for routing or direct use.") : state === 'unreachable' ? (zh ? '无法访问端点。请检查网络连接或确认端点 URL 正确。' : 'Endpoint unreachable. Check your network connection or verify the endpoint URL is correct.') : null
   const endpoint = provider.baseUrl.replace(/^https?:\/\//, '').replace(/\/v\d.*$/, '')
-  return <main className="pv-provider-detail" data-figma-screen={PROVIDER_STATE_SCREEN[state]}><div className="pv-provider-detail-content"><header className="pv-provider-detail-header"><ProviderMark large provider={provider} /><i className={`state ${state}`} /><h2>{provider.label}</h2>{state !== 'active' && state !== 'disabled' && <Tag tone={state === 'not-configured' ? 'warning' : 'danger'}>{stateLabel(state, zh)}</Tag>}<Toggle checked={state !== 'disabled'} label="Enable connection" onChange={(value) => onDisable(!value)} /></header>
+  return <main className="pv-provider-detail" data-figma-screen={providerFigmaScreen(provider.id, state)}><div className="pv-provider-detail-content"><header className="pv-provider-detail-header"><ProviderMark large provider={provider} /><i className={`state ${state}`} /><h2>{provider.label}</h2>{state !== 'active' && state !== 'disabled' && <Tag tone={state === 'not-configured' ? 'warning' : 'danger'}>{stateLabel(state, zh)}</Tag>}<Toggle checked={state !== 'disabled'} label="Enable connection" onChange={(value) => onDisable(!value)} /></header>
     {issue && <div className={`pv-provider-state-message ${state}`}><AlertTriangle size={14} /><p>{issue}</p></div>}
-    <ProviderSection title={zh ? '连接详情' : 'CONNECTION DETAILS'}><Kv label={zh ? '类型' : 'Type'} value={zh ? '内置适配器' : 'Built-in adapter'} /><Kv label={zh ? '端点' : 'Endpoint'} value={endpoint} /><Kv label={zh ? '凭据' : 'Credential'} value={saved?.hasApiKey ? (zh ? '已安全存储' : 'Stored securely') : (zh ? '未设置' : 'Not set')} /><Kv label={zh ? '状态' : 'Status'} value={stateLabel(state, zh)} />{state !== 'not-configured' && state !== 'auth-failed' && <><Kv label={zh ? '范围' : 'Scope'} value={provider.scope} /><Kv label={zh ? '上次测试' : 'Last tested'} value={zh ? '2 分钟前' : '2 minutes ago'} /><Kv label={zh ? '延迟' : 'Latency'} value={state === 'rate-limited' ? '1,240ms avg' : '142ms avg'} /></>}{state === 'not-configured' && <div className="pv-provider-connect"><p>{zh ? `添加 ${provider.label} API 密钥以启用此连接并访问可用模型。` : `Add your ${provider.label} API key to enable this connection and access available models.`}</p><ActionButton onClick={onCredential} primary>{zh ? '连接' : 'Connect'}</ActionButton></div>}</ProviderSection>
+    <ProviderSection title={zh ? '连接详情' : 'CONNECTION DETAILS'}><Kv label={zh ? '类型' : 'Type'} value={zh ? '提供商适配器' : 'Provider adapter'} /><Kv label={zh ? '端点' : 'Endpoint'} value={endpoint} /><Kv label={zh ? '凭据' : 'Credential'} value={saved?.hasApiKey ? (zh ? '已安全存储' : 'Stored securely') : (zh ? '未设置' : 'Not set')} /><Kv label={zh ? '状态' : 'Status'} value={stateLabel(state, zh)} />{state !== 'not-configured' && state !== 'auth-failed' && <Kv label={zh ? '范围' : 'Scope'} value={provider.scope} />}{state === 'not-configured' && <div className="pv-provider-connect"><p>{zh ? `添加 ${provider.label} API 密钥以启用此连接并访问可用模型。` : `Add your ${provider.label} API key to enable this connection and access available models.`}</p><ActionButton onClick={onCredential} primary>{zh ? '连接' : 'Connect'}</ActionButton></div>}</ProviderSection>
     {state !== 'not-configured' && state !== 'auth-failed' && state !== 'unreachable' && <><ProviderSection title={zh ? '能力' : 'CAPABILITIES'}><div className="pv-provider-capabilities">{provider.capabilities.map((item) => <span key={item}>{item}</span>)}</div></ProviderSection><ProviderSection title={zh ? '可用模型' : 'AVAILABLE MODELS'}><div className="pv-provider-models">{(MODELS[provider.id] ?? [provider.model]).map((model) => <div key={model}><strong>{model}</strong><small>{provider.context}</small></div>)}</div></ProviderSection></>}
     {state === 'not-configured' ? <ProviderSection title={zh ? '可用模型' : 'AVAILABLE MODELS'}><p className="pv-provider-empty">{zh ? '连接后查看可用模型。' : 'Connect to see available models.'}</p></ProviderSection> : <ProviderSection title={zh ? '操作' : 'ACTIONS'}><div className="pv-provider-actions"><ActionButton onClick={onCredential}>{state === 'auth-failed' ? (zh ? '更新密钥' : 'Update Key') : (zh ? '管理凭据' : 'Manage Credential')}</ActionButton><ActionButton onClick={onTest}>{state === 'testing' ? (zh ? '取消测试' : 'Cancel Test') : (zh ? '测试连接' : 'Test Connection')}</ActionButton>{state !== 'auth-failed' && state !== 'unreachable' && <><ActionButton onClick={onTest}>{zh ? '刷新模型' : 'Refresh Models'}</ActionButton><ActionButton onClick={() => onDisable(true)}>{zh ? '禁用' : 'Disable'}</ActionButton></>}</div></ProviderSection>}
-    {state !== 'not-configured' && state !== 'auth-failed' && state !== 'unreachable' && <ProviderSection title={zh ? '使用位置' : 'USED BY'}><div className="pv-provider-used-by"><span>Routing: Code generation <b>Global</b></span><span>Routing: Code review <b>Global</b></span><span>Routing: Chat / Q&amp;A <b>Workspace: pivot-ui</b></span><span>Automation: Daily test suite <b>Project</b></span></div></ProviderSection>}
+    {state !== 'not-configured' && state !== 'auth-failed' && state !== 'unreachable' && <ProviderSection title={zh ? '使用位置' : 'USED BY'}><p className="pv-provider-empty">{zh ? '当前没有可验证的路由或自动化引用。' : 'No verified routing or automation references are available.'}</p></ProviderSection>}
     {saved?.hasApiKey && <section className="pv-provider-danger"><h3>{zh ? '危险区域' : 'DANGER ZONE'}</h3><div><p>{zh ? '移除此连接已保存的 API 密钥。' : 'Remove the stored API key for this connection.'}</p><ActionButton disabled={saved.isActive} onClick={onRemove} variant="danger">{zh ? '移除凭据' : 'Remove Credential'}</ActionButton></div></section>}
   </div></main>
 }
@@ -155,4 +150,15 @@ function ProviderSection({ children, title }: { children: ReactNode; title: stri
 function Kv({ label, value }: { label: string; value: string }): ReactElement { return <div className="pv-provider-kv"><span>{label}</span><strong>{value}</strong></div> }
 function ProviderMark({ large = false, provider }: { large?: boolean; provider: ProviderView }): ReactElement { return <span className={`pv-provider-mark ${large ? 'large' : ''}`}>{provider.label.slice(0, 1)}</span> }
 function providerState(saved: ProviderConfig | undefined, result: ProviderConnectionResult | undefined, disabled: boolean, loading: boolean): ProviderState { if (disabled) return 'disabled'; if (loading) return 'testing'; if (!saved?.hasApiKey) return 'not-configured'; if (!result || result.ok) return 'active'; if (result.status === 401 || result.status === 403) return 'auth-failed'; if (result.status === 429) return 'rate-limited'; if (result.status === 404) return 'model-unavailable'; return 'unreachable' }
+function providerFigmaScreen(id: string, state: ProviderState): string {
+  if (id.startsWith('anthropic') && state === 'rate-limited') return '1406:12069'
+  if (id.startsWith('openai') && state === 'auth-failed') return '1406:12440'
+  if (id.startsWith('anthropic')) return '1405:10653'
+  if (id.startsWith('openai')) return '1405:11063'
+  if (id.startsWith('google')) return '1405:11501'
+  if (id.startsWith('mistral')) return '1405:11877'
+  if (id.startsWith('bedrock')) return '1406:11244'
+  if (id.startsWith('ollama')) return '1406:11690'
+  return '1171:9637'
+}
 function stateLabel(state: ProviderState, zh: boolean): string { const labels: Record<ProviderState, [string, string]> = { active: ['活跃', 'Active'], 'auth-failed': ['认证失败', 'Auth failed'], disabled: ['已禁用', 'Disabled'], 'model-unavailable': ['服务降级', 'Degraded'], 'not-configured': ['未配置', 'Not configured'], 'rate-limited': ['频率受限', 'Rate limited'], testing: ['测试中…', 'Testing…'], unreachable: ['无法访问', 'Unreachable'] }; return labels[state][zh ? 0 : 1] }

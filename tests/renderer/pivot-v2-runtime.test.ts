@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import type { SessionRecord, WorkItemSnapshot } from '../../src/shared/types/domain'
 import { LocaleProvider } from '../../src/renderer/i18n/locale-context'
-import { NowWorkspace } from '../../src/renderer/components/now-workspace'
+import { DashboardWorkspace } from '../../src/renderer/components/dashboard-workspace'
 import { PivotAppShell } from '../../src/renderer/components/pivot-app-shell'
 
 describe('Pivot UI V2 rendered behavior', () => {
@@ -18,9 +18,10 @@ describe('Pivot UI V2 rendered behavior', () => {
       }),
     ))
 
-    for (const route of ['now', 'projects', 'automations', 'docs', 'marketplace', 'extensions', 'settings', 'help']) {
+    for (const route of ['now', 'projects', 'automations', 'database', 'marketplace', 'extensions', 'settings', 'help']) {
       expect(html).toContain(`data-route="${route}"`)
     }
+    expect(html).not.toContain('data-route="docs"')
     expect(html).not.toContain('data-route="work"')
     expect(html).not.toContain('data-route="artifacts"')
     expect(html.match(/data-route="settings"/g)).toHaveLength(1)
@@ -49,25 +50,22 @@ describe('Pivot UI V2 rendered behavior', () => {
     const html = renderToStaticMarkup(createElement(
       LocaleProvider,
       null,
-      createElement(NowWorkspace, {
+      createElement(DashboardWorkspace, {
         attentionMessage: 'Runtime requires review',
         isStreaming: false,
         onCreateProject: () => undefined,
-        onNavigateToAutomations: () => undefined,
-        onNavigateToExtensions: () => undefined,
-        onNavigateToProjects: () => undefined,
         onOpenSession: async () => undefined,
-        operationCount: 0,
+        operations: [],
         sessions,
         workItems,
       }),
     ))
 
     expect(html).toContain('data-figma-screen="1026:8514"')
-    expect(html).toContain('pv-now-summary attention"><span>待处理</span><strong>5</strong>')
-    expect(html).toContain('pv-now-summary running"><span>本地 / 远程运行</span><strong>1</strong>')
-    expect(html).toContain('pv-now-summary accent"><span>已完成</span><strong>1</strong>')
-    expect(html).toContain('pv-now-summary accent"><span>最近成果</span><strong>5</strong>')
+    expect(html).toMatch(/pv-dashboard-metric danger[\s\S]*?<strong>5<\/strong>/)
+    expect(html).toMatch(/pv-dashboard-metric active[\s\S]*?<strong>1<\/strong>/)
+    expect(html).toMatch(/pv-dashboard-metric complete[\s\S]*?<strong>1<\/strong>/)
+    expect(html).toContain('50%')
     expect(html).toContain('First task')
     expect(html).toContain('Runtime requires review')
   })

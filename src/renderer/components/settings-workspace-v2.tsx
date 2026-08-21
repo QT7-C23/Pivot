@@ -26,16 +26,16 @@ const FIGMA_SCREEN: Record<SettingsSectionId, string> = {
 }
 
 export const FIGMA_PROVIDER_SCREENS = {
-  connection: '126:4263',
-  notConfigured: '126:4616',
-  authFailed: '126:4848',
-  disabled: '126:5089',
-  unreachable: '126:5324',
-  testing: '134:2399',
-  rateLimited: '134:2685',
-  modelUnavailable: '134:2971',
-  routing: '216:4078',
-  monitor: '227:4311',
+  connection: '1171:9637',
+  routing: '1171:11360',
+  anthropicConnected: '1405:10653',
+  openAiActive: '1405:11063',
+  geminiActive: '1405:11501',
+  mistralSetup: '1405:11877',
+  bedrockConnected: '1406:11244',
+  ollamaRunning: '1406:11690',
+  anthropicRateLimited: '1406:12069',
+  openAiAuthFailed: '1406:12440',
 } as const
 
 function isPlaceholderSection(id: SettingsSectionId): boolean {

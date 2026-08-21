@@ -1,5 +1,6 @@
-import { BookOpen, CircleHelp, FolderKanban, Home, Puzzle, Settings, Store, Zap, type LucideIcon } from 'lucide-react'
+import { CircleHelp, Database, FolderKanban, Home, Puzzle, Settings, Store, Zap, type LucideIcon } from 'lucide-react'
 import type { ReactElement, ReactNode } from 'react'
+import pivotLogoMark from '../assets/pivot-logo-mark.png'
 import { useLocale } from '../i18n/locale-context'
 import type { PivotRoute } from '../navigation/pivot-navigation'
 
@@ -16,12 +17,12 @@ const PRIMARY_NAVIGATION: NavigationItem[] = [
   { route: 'now', icon: Home, label: { en: 'Home', 'zh-CN': '主页', ja: 'ホーム', de: 'Start' } },
   { route: 'projects', icon: FolderKanban, label: { en: 'Projects', 'zh-CN': '项目', ja: 'プロジェクト', de: 'Projekte' } },
   { route: 'automations', icon: Zap, label: { en: 'Auto', 'zh-CN': '自动', ja: '自動', de: 'Auto' } },
-  { route: 'docs', icon: BookOpen, label: { en: 'Docs', 'zh-CN': '文档', ja: '文書', de: 'Doku' } },
+  { route: 'database', icon: Database, label: { en: 'DB', 'zh-CN': '数据库', ja: 'DB', de: 'DB' } },
 ]
 
 const SECONDARY_NAVIGATION: NavigationItem[] = [
   { route: 'marketplace', icon: Store, label: { en: 'Market', 'zh-CN': '市场', ja: '市場', de: 'Markt' } },
-  { route: 'extensions', icon: Puzzle, label: { en: 'Ext', 'zh-CN': '扩展', ja: '拡張', de: 'Ext' } },
+  { route: 'extensions', icon: Puzzle, label: { en: 'Toolkit', 'zh-CN': '工具', ja: 'ツール', de: 'Tools' } },
   { route: 'settings', icon: Settings, label: { en: 'Settings', 'zh-CN': '设置', ja: '設定', de: 'Einstellungen' } },
   { route: 'help', icon: CircleHelp, label: { en: 'Help', 'zh-CN': '帮助', ja: 'ヘルプ', de: 'Hilfe' } },
 ]
@@ -51,7 +52,7 @@ export function PivotAppShell({
   return (
     <main className={`pv-app-shell route-${activeRoute}`} data-active-route={activeRoute}>
       <header className="pv-titlebar">
-        <div className="pv-titlebar-brand"><span aria-hidden="true" className="pv-brand-glyph" /><strong>PIVOT</strong></div>
+        <div className="pv-titlebar-brand"><img alt="" height="18" src={pivotLogoMark} width="24" /><strong>PIVOT</strong></div>
         <button
           aria-expanded={commandPaletteOpen}
           aria-keyshortcuts="Meta+K Control+K"
@@ -65,7 +66,7 @@ export function PivotAppShell({
       </header>
       <div className="pv-shell-body">
         <nav aria-label="Pivot" className="pv-global-rail" data-figma-component="1337:9921">
-          <button aria-label="Profile" className="pv-rail-avatar" title="Profile" type="button">P</button>
+          <button aria-current={activeRoute === 'profile' ? 'page' : undefined} aria-label="Profile" className={`pv-rail-avatar ${activeRoute === 'profile' ? 'active' : ''}`} onClick={() => onNavigate('profile')} title="Profile" type="button">P</button>
           <div className="pv-rail-group">
             {PRIMARY_NAVIGATION.map((item) => (
               <RailButton active={activeRoute === item.route} item={item} key={item.route} labelLocale={labelLocale} onNavigate={onNavigate} />

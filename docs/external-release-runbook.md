@@ -93,7 +93,7 @@ value. An unsupported or incomplete signing method fails closed.
 2. Commit all intended changes, review the diff, run `npm.cmd run
    verify:beta2`, and make sure the worktree is clean.
 3. In GitHub Actions, select `Windows external release`, choose **Run
-   workflow**, and enter the exact package version such as `2.0.21-beta`.
+   workflow**, and enter the exact package version such as `2.0.22-beta`.
 4. Approve the protected `external-release` environment only after confirming
    the source commit and version.
 5. Wait for tests, the production build, signing, packaged smoke test and
@@ -106,7 +106,7 @@ value. An unsupported or incomplete signing method fails closed.
    verify it independently:
 
    ```powershell
-   Get-AuthenticodeSignature -LiteralPath '.\Pivot-2.0.21-beta-Windows-x64.exe' |
+   Get-AuthenticodeSignature -LiteralPath '.\Pivot-2.0.22-beta-Windows-x64.exe' |
      Format-List Status,StatusMessage,SignerCertificate,TimeStamperCertificate
    ```
 

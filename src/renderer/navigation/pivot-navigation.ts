@@ -1,10 +1,12 @@
 export type PivotRoute =
+  | 'profile'
   | 'now'
   | 'sessions'
   | 'projects'
   | 'work'
   | 'artifacts'
   | 'automations'
+  | 'database'
   | 'docs'
   | 'runtimes'
   | 'marketplace'

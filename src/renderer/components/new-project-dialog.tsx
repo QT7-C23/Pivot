@@ -71,7 +71,7 @@ export function NewProjectDialog({
   }
 
   return (
-    <div className="pv-new-project-backdrop" data-figma-screen="597:5842" onMouseDown={(event) => { if (event.target === event.currentTarget && !busy) onCancel() }}>
+    <div className="pv-new-project-backdrop" data-figma-screen="818:21434" onMouseDown={(event) => { if (event.target === event.currentTarget && !busy) onCancel() }}>
       <form aria-labelledby="pv-new-project-title" aria-modal="true" className="pv-new-project-dialog" onSubmit={(event) => void submit(event)} role="dialog">
         <header><h1 id="pv-new-project-title">{copy.title}</h1><p>{copy.subtitle}</p></header>
         <div className="pv-new-project-fields">

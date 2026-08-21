@@ -62,10 +62,11 @@ describe('current Pivot UI V2 design-system contract', () => {
     }
   })
 
-  it('keeps the shell and long content fluid instead of pinning a 900px CSS viewport', () => {
+  it('keeps the shell on the fixed Figma canvas while long content remains readable', () => {
     const css = readFileSync(path.join(rendererRoot, 'pivot-design-system.css'), 'utf8')
-    expect(css).toMatch(/\.pv-app-shell\s*\{[^}]*min-width:\s*0/s)
-    expect(css).toContain('@media (max-width: 760px)')
+    expect(css).toMatch(/\.pv-app-shell\s*\{[^}]*min-width:\s*var\(--pv-design-canvas-width\)/s)
+    expect(css).toContain('--pv-design-canvas-width: 1440px')
+    expect(css).not.toMatch(/@media \(max-width:/)
     expect(css).toContain('overflow-wrap: anywhere')
   })
 })

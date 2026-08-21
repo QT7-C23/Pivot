@@ -28,12 +28,13 @@ describe('Spotlight surface contract', () => {
     expect(source).not.toContain('useState')
   })
 
-  it('is scoped to intended decision surfaces and respects reduced motion', () => {
+  it('is scoped to provider decisions instead of the current Figma onboarding and respects reduced motion', () => {
     const welcome = readFileSync(path.join(rendererRoot, 'components/welcome-screen.tsx'), 'utf8')
     const provider = readFileSync(path.join(rendererRoot, 'components/provider-workspace.tsx'), 'utf8')
     const css = readFileSync(path.join(rendererRoot, 'pivot-012.css'), 'utf8')
 
-    expect(welcome).toContain('<SpotlightSurface')
+    expect(welcome).not.toContain('<SpotlightSurface')
+    expect(welcome).toContain('pv-onboarding-card')
     expect(provider).toContain('<SpotlightButton')
     expect(css).toContain('.spotlight-surface::before')
     expect(css).toContain('@media (prefers-reduced-motion: reduce)')
