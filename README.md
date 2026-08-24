@@ -90,6 +90,9 @@ Release is qualified only when its Windows installer passes Authenticode and
 packaged smoke checks. The first signed Beta establishes the baseline needed
 for a later real previous-version upgrade/rollback and interruption drill.
 
+Maked By
+This project is miantained by Geng Xinchen.
+
 ## License
 
 Apache-2.0. See [`LICENSE`](./LICENSE) and
